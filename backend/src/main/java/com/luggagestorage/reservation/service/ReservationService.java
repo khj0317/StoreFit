@@ -16,7 +16,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.Duration;
 import java.util.List;
 
 @Service
@@ -38,17 +37,12 @@ public class ReservationService {
             throw new BusinessException(ErrorCode.INVALID_RESERVATION_TIME);
         }
 
-        long minutes = Duration.between(request.startTime(), request.endTime()).toMinutes();
-        long hours = (minutes + 59) / 60;
-        int totalPrice = (int) hours * store.getPricePerHour();
-
         Reservation reservation = new Reservation(
             member,
             store,
             request.luggageCount(),
             request.startTime(),
-            request.endTime(),
-            totalPrice
+            request.endTime()
         );
 
         return ReservationResponse.from(reservationRepository.save(reservation));

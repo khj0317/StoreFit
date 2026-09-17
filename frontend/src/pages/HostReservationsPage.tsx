@@ -62,7 +62,7 @@ export function HostReservationsPage() {
                 {reservation.startTime.replace('T', ' ')} ~ {reservation.endTime.replace('T', ' ')}
               </p>
               <p>
-                짐 {reservation.luggageCount}개 · {reservation.totalPrice.toLocaleString()}원
+                짐 {reservation.luggageCount}개
               </p>
             </div>
             <div className="list-item-actions">

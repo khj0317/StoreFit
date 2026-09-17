@@ -19,7 +19,7 @@ export function HomePage() {
         setStatus('ready')
       })
       .catch((err: unknown) => {
-        setError(getErrorMessage(err, '보관소 목록을 불러오지 못했습니다.'))
+        setError(getErrorMessage(err, '짐 보관 목록을 불러오지 못했습니다.'))
         setStatus('error')
       })
   }, [])
@@ -47,11 +47,11 @@ export function HomePage() {
       </section>
 
       <section>
-        <h2>보관소 둘러보기</h2>
+        <h2>짐 보관 둘러보기</h2>
 
         {status === 'loading' && <p>불러오는 중...</p>}
         {status === 'error' && <p className="error-text">{error}</p>}
-        {status === 'ready' && stores.length === 0 && <p>등록된 보관소가 없습니다.</p>}
+        {status === 'ready' && stores.length === 0 && <p>등록된 짐 보관 정보가 없습니다.</p>}
 
         <div className="store-grid">
           {stores.map((store) => (

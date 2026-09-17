@@ -18,9 +18,9 @@ export function Navbar() {
         <Wordmark />
       </Link>
       <nav className="navbar-links">
-        <Link to="/">보관소 찾기</Link>
+        <Link to="/">짐 보관 찾기</Link>
         {isAuthenticated && <Link to="/my/reservations">내 예약</Link>}
-        {isAuthenticated && <Link to="/my/stores">내 보관소</Link>}
+        {isAuthenticated && <Link to="/my/stores">내 짐 보관</Link>}
         {isAuthenticated && <Link to="/my/host-reservations">호스트 예약 관리</Link>}
       </nav>
       <div className="navbar-actions">

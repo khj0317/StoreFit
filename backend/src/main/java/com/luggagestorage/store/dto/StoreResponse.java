@@ -3,7 +3,6 @@ package com.luggagestorage.store.dto;
 import com.luggagestorage.store.entity.Store;
 
 import java.time.LocalDateTime;
-import java.time.LocalTime;
 import java.util.List;
 
 public record StoreResponse(
@@ -13,12 +12,6 @@ public record StoreResponse(
     String name,
     String description,
     String address,
-    Double latitude,
-    Double longitude,
-    Integer pricePerHour,
-    Integer capacity,
-    LocalTime openTime,
-    LocalTime closeTime,
     List<String> imageUrls,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
@@ -32,12 +25,6 @@ public record StoreResponse(
             store.getName(),
             store.getDescription(),
             store.getAddress(),
-            store.getLatitude(),
-            store.getLongitude(),
-            store.getPricePerHour(),
-            store.getCapacity(),
-            store.getOpenTime(),
-            store.getCloseTime(),
             imageUrls,
             store.getCreatedAt(),
             store.getUpdatedAt()

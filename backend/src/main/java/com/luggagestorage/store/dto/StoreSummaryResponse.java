@@ -6,8 +6,6 @@ public record StoreSummaryResponse(
     Long id,
     String name,
     String address,
-    Integer pricePerHour,
-    Integer capacity,
     String thumbnailUrl
 ) {
 
@@ -16,8 +14,6 @@ public record StoreSummaryResponse(
             store.getId(),
             store.getName(),
             store.getAddress(),
-            store.getPricePerHour(),
-            store.getCapacity(),
             thumbnailUrl
         );
     }

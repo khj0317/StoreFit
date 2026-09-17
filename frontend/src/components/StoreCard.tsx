@@ -14,9 +14,6 @@ export function StoreCard({ store }: { store: StoreSummary }) {
       <div className="store-card-body">
         <h3>{store.name}</h3>
         <p className="store-card-address">{store.address}</p>
-        <p className="store-card-meta">
-          시간당 {store.pricePerHour.toLocaleString()}원 · 수용 {store.capacity}개
-        </p>
       </div>
     </Link>
   )

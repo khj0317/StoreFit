@@ -38,13 +38,7 @@ public class StoreService {
             host,
             request.name(),
             request.description(),
-            request.address(),
-            request.latitude(),
-            request.longitude(),
-            request.pricePerHour(),
-            request.capacity(),
-            request.openTime(),
-            request.closeTime()
+            request.address()
         );
         storeRepository.save(store);
 
@@ -84,13 +78,7 @@ public class StoreService {
         store.update(
             request.name(),
             request.description(),
-            request.address(),
-            request.latitude(),
-            request.longitude(),
-            request.pricePerHour(),
-            request.capacity(),
-            request.openTime(),
-            request.closeTime()
+            request.address()
         );
 
         List<String> imageUrls;

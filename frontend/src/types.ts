@@ -27,8 +27,6 @@ export interface StoreSummary {
   id: number
   name: string
   address: string
-  pricePerHour: number
-  capacity: number
   thumbnailUrl: string | null
 }
 
@@ -39,12 +37,6 @@ export interface StoreDetail {
   name: string
   description: string | null
   address: string
-  latitude: number | null
-  longitude: number | null
-  pricePerHour: number
-  capacity: number
-  openTime: string | null
-  closeTime: string | null
   imageUrls: string[]
   createdAt: string
   updatedAt: string
@@ -54,12 +46,6 @@ export interface StoreMutationRequest {
   name: string
   description: string | null
   address: string
-  latitude: number | null
-  longitude: number | null
-  pricePerHour: number
-  capacity: number
-  openTime: string | null
-  closeTime: string | null
   imageUrls: string[]
 }
 
@@ -67,12 +53,6 @@ export interface StoreFormValues {
   name: string
   description: string
   address: string
-  latitude: string
-  longitude: string
-  pricePerHour: string
-  capacity: string
-  openTime: string
-  closeTime: string
   imageUrls: string
 }
 
@@ -88,7 +68,6 @@ export interface Reservation {
   startTime: string
   endTime: string
   status: ReservationStatus
-  totalPrice: number
   createdAt: string
 }
 

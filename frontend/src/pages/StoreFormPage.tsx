@@ -8,12 +8,6 @@ const EMPTY_FORM: StoreFormValues = {
   name: '',
   description: '',
   address: '',
-  latitude: '',
-  longitude: '',
-  pricePerHour: '',
-  capacity: '',
-  openTime: '',
-  closeTime: '',
   imageUrls: '',
 }
 
@@ -22,12 +16,6 @@ function toRequest(form: StoreFormValues): StoreMutationRequest {
     name: form.name,
     description: form.description || null,
     address: form.address,
-    latitude: form.latitude ? Number(form.latitude) : null,
-    longitude: form.longitude ? Number(form.longitude) : null,
-    pricePerHour: Number(form.pricePerHour),
-    capacity: Number(form.capacity),
-    openTime: form.openTime || null,
-    closeTime: form.closeTime || null,
     imageUrls: form.imageUrls
       .split('\n')
       .map((url) => url.trim())
@@ -53,16 +41,10 @@ export function StoreFormPage() {
           name: store.name,
           description: store.description ?? '',
           address: store.address,
-          latitude: store.latitude?.toString() ?? '',
-          longitude: store.longitude?.toString() ?? '',
-          pricePerHour: store.pricePerHour.toString(),
-          capacity: store.capacity.toString(),
-          openTime: store.openTime?.slice(0, 5) ?? '',
-          closeTime: store.closeTime?.slice(0, 5) ?? '',
           imageUrls: store.imageUrls.join('\n'),
         })
       })
-      .catch((err: unknown) => setError(getErrorMessage(err, '보관소 정보를 불러오지 못했습니다.')))
+      .catch((err: unknown) => setError(getErrorMessage(err, '짐 보관 정보를 불러오지 못했습니다.')))
       .finally(() => setLoading(false))
   }, [isEdit, storeId])
 
@@ -90,73 +72,39 @@ export function StoreFormPage() {
   }
 
   return (
-    <section>
-      <h1>{isEdit ? '보관소 수정' : '보관소 등록'}</h1>
-      <form className="form" onSubmit={handleSubmit}>
-        <label className="form-group">
-          <span>이름</span>
-          <input value={form.name} onChange={(e) => updateField('name', e.target.value)} required />
-        </label>
-        <label className="form-group">
-          <span>설명</span>
-          <textarea value={form.description} onChange={(e) => updateField('description', e.target.value)} />
-        </label>
-        <label className="form-group">
-          <span>주소</span>
-          <input value={form.address} onChange={(e) => updateField('address', e.target.value)} required />
-        </label>
-        <div className="form-row">
+    <div className="centered-layout">
+      <div className="centered-card">
+        <h1>{isEdit ? '내 짐 보관 수정' : '내 짐 보관'}</h1>
+        <form className="form" onSubmit={handleSubmit}>
           <label className="form-group">
-            <span>위도</span>
-            <input type="number" step="any" value={form.latitude} onChange={(e) => updateField('latitude', e.target.value)} />
+            <span>제목</span>
+            <input value={form.name} onChange={(e) => updateField('name', e.target.value)} required />
           </label>
           <label className="form-group">
-            <span>경도</span>
-            <input type="number" step="any" value={form.longitude} onChange={(e) => updateField('longitude', e.target.value)} />
-          </label>
-        </div>
-        <div className="form-row">
-          <label className="form-group">
-            <span>시간당 가격 (원)</span>
-            <input
-              type="number"
-              min={1}
-              value={form.pricePerHour}
-              onChange={(e) => updateField('pricePerHour', e.target.value)}
-              required
+            <span>사진 URL (한 줄에 하나씩)</span>
+            <textarea
+              value={form.imageUrls}
+              onChange={(e) => updateField('imageUrls', e.target.value)}
+              rows={4}
+              placeholder={'https://example.com/1.jpg\nhttps://example.com/2.jpg'}
             />
           </label>
           <label className="form-group">
-            <span>수용 개수</span>
-            <input type="number" min={1} value={form.capacity} onChange={(e) => updateField('capacity', e.target.value)} required />
-          </label>
-        </div>
-        <div className="form-row">
-          <label className="form-group">
-            <span>오픈 시간</span>
-            <input type="time" value={form.openTime} onChange={(e) => updateField('openTime', e.target.value)} />
+            <span>주소</span>
+            <input value={form.address} onChange={(e) => updateField('address', e.target.value)} required />
           </label>
           <label className="form-group">
-            <span>마감 시간</span>
-            <input type="time" value={form.closeTime} onChange={(e) => updateField('closeTime', e.target.value)} />
+            <span>기타사항</span>
+            <textarea value={form.description} onChange={(e) => updateField('description', e.target.value)} rows={3} />
           </label>
-        </div>
-        <label className="form-group">
-          <span>이미지 URL (한 줄에 하나씩)</span>
-          <textarea
-            value={form.imageUrls}
-            onChange={(e) => updateField('imageUrls', e.target.value)}
-            rows={4}
-            placeholder={'https://example.com/1.jpg\nhttps://example.com/2.jpg'}
-          />
-        </label>
 
-        {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text">{error}</p>}
 
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? '저장 중...' : '저장'}
-        </button>
-      </form>
-    </section>
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? '저장 중...' : '저장'}
+          </button>
+        </form>
+      </div>
+    </div>
   )
 }

@@ -15,7 +15,6 @@ public record ReservationResponse(
     LocalDateTime startTime,
     LocalDateTime endTime,
     ReservationStatus status,
-    Integer totalPrice,
     LocalDateTime createdAt
 ) {
 
@@ -30,7 +29,6 @@ public record ReservationResponse(
             reservation.getStartTime(),
             reservation.getEndTime(),
             reservation.getStatus(),
-            reservation.getTotalPrice(),
             reservation.getCreatedAt()
         );
     }

@@ -29,7 +29,7 @@ export function StoreDetailPage() {
         setStore(storeData)
         setReviews(reviewData)
       })
-      .catch((err: unknown) => setLoadError(getErrorMessage(err, '보관소 정보를 불러오지 못했습니다.')))
+      .catch((err: unknown) => setLoadError(getErrorMessage(err, '짐 보관 정보를 불러오지 못했습니다.')))
   }, [id])
 
   const handleReserve = async (event: FormEvent) => {
@@ -65,15 +65,13 @@ export function StoreDetailPage() {
       <div className="store-detail-header">
         <h1>{store.name}</h1>
         <p className="store-card-address">{store.address}</p>
-        <p>
-          시간당 {store.pricePerHour.toLocaleString()}원 · 수용 {store.capacity}개 · 호스트 {store.hostName}
-        </p>
-        {store.openTime && store.closeTime && (
-          <p>
-            운영 시간 {store.openTime.slice(0, 5)} ~ {store.closeTime.slice(0, 5)}
-          </p>
+        <p>등록자 {store.hostName}</p>
+        {store.description && (
+          <>
+            <h3>기타사항</h3>
+            <p>{store.description}</p>
+          </>
         )}
-        {store.description && <p>{store.description}</p>}
       </div>
 
       {store.imageUrls.length > 0 && (
@@ -104,11 +102,7 @@ export function StoreDetailPage() {
               </label>
 
               {reserveError && <p className="error-text">{reserveError}</p>}
-              {reserveResult && (
-                <p className="success-text">
-                  예약이 생성되었습니다. 총 금액: {reserveResult.totalPrice.toLocaleString()}원
-                </p>
-              )}
+              {reserveResult && <p className="success-text">예약이 생성되었습니다.</p>}
 
               <button type="submit" className="btn btn-primary" disabled={submitting}>
                 {submitting ? '예약 중...' : '예약하기'}

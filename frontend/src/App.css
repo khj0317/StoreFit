@@ -200,7 +200,7 @@ select:focus {
   font-size: 14px;
 }
 
-.auth-layout {
+.centered-layout {
   min-height: calc(100svh - 200px);
   display: flex;
   align-items: center;
@@ -208,21 +208,21 @@ select:focus {
   padding: 40px 0;
 }
 
-.auth-card {
+.centered-card {
   width: 100%;
-  max-width: 400px;
+  max-width: 440px;
   border: 1px solid var(--border);
   border-radius: 16px;
   padding: 36px 32px;
   box-shadow: 0 12px 32px rgba(18, 20, 59, 0.06);
 }
 
-.auth-card h1 {
+.centered-card h1 {
   text-align: center;
   margin-bottom: 24px;
 }
 
-.auth-card .form {
+.centered-card .form {
   max-width: none;
 }
 
@@ -345,11 +345,6 @@ select:focus {
 .store-card-address {
   font-size: 13px;
   color: var(--text);
-}
-
-.store-card-meta {
-  font-size: 13px;
-  margin-top: 6px;
 }
 
 /* Store detail */

@@ -51,17 +51,13 @@ public class Reservation extends BaseTimeEntity {
     @Column(nullable = false)
     private ReservationStatus status;
 
-    @Column(nullable = false)
-    private Integer totalPrice;
-
     public Reservation(Member member, Store store, Integer luggageCount,
-                        LocalDateTime startTime, LocalDateTime endTime, Integer totalPrice) {
+                        LocalDateTime startTime, LocalDateTime endTime) {
         this.member = member;
         this.store = store;
         this.luggageCount = luggageCount;
         this.startTime = startTime;
         this.endTime = endTime;
-        this.totalPrice = totalPrice;
         this.status = ReservationStatus.PENDING;
     }
 

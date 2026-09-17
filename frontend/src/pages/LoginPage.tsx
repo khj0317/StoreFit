@@ -29,8 +29,8 @@ export function LoginPage() {
   }
 
   return (
-    <div className="auth-layout">
-      <div className="auth-card">
+    <div className="centered-layout">
+      <div className="centered-card">
         <h1>로그인</h1>
         <form className="form" onSubmit={handleSubmit}>
           <label className="form-group">
