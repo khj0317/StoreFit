@@ -26,3 +26,7 @@ springdoc:
     path: /swagger-ui.html
   api-docs:
     path: /v3/api-docs
+
+jwt:
+  secret: dev-only-secret-key-change-this-before-deploying-to-production-1234567890
+  access-token-expiration-ms: 3600000
