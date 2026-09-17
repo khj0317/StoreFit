@@ -61,6 +61,13 @@ public class ReservationService {
             .toList();
     }
 
+    public List<ReservationResponse> getHostReservations() {
+        Member host = getCurrentMember();
+        return reservationRepository.findByStore_HostOrderByCreatedAtDesc(host).stream()
+            .map(ReservationResponse::from)
+            .toList();
+    }
+
     public ReservationResponse getReservation(Long reservationId) {
         Reservation reservation = getReservationOrThrow(reservationId);
         Member current = getCurrentMember();

@@ -34,6 +34,11 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getMyReservations());
     }
 
+    @GetMapping("/host")
+    public ResponseEntity<List<ReservationResponse>> getHostReservations() {
+        return ResponseEntity.ok(reservationService.getHostReservations());
+    }
+
     @GetMapping("/{reservationId}")
     public ResponseEntity<ReservationResponse> getReservation(@PathVariable Long reservationId) {
         return ResponseEntity.ok(reservationService.getReservation(reservationId));
