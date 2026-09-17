@@ -1,5 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { LogoMark, Wordmark } from './Logo'
 
 export function Navbar() {
   const { user, isAuthenticated, logout } = useAuth()
@@ -13,7 +14,8 @@ export function Navbar() {
   return (
     <header className="navbar">
       <Link to="/" className="navbar-brand">
-        짐보관 플랫폼
+        <LogoMark />
+        <Wordmark />
       </Link>
       <nav className="navbar-links">
         <Link to="/">보관소 찾기</Link>

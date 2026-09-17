@@ -29,27 +29,29 @@ export function LoginPage() {
   }
 
   return (
-    <section className="auth-page">
-      <h1>로그인</h1>
-      <form className="form" onSubmit={handleSubmit}>
-        <label className="form-group">
-          <span>이메일</span>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        </label>
-        <label className="form-group">
-          <span>비밀번호</span>
-          <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
-        </label>
+    <div className="auth-layout">
+      <div className="auth-card">
+        <h1>로그인</h1>
+        <form className="form" onSubmit={handleSubmit}>
+          <label className="form-group">
+            <span>이메일</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+          </label>
+          <label className="form-group">
+            <span>비밀번호</span>
+            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+          </label>
 
-        {error && <p className="error-text">{error}</p>}
+          {error && <p className="error-text">{error}</p>}
 
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
-          {submitting ? '로그인 중...' : '로그인'}
-        </button>
-      </form>
-      <p className="auth-switch">
-        아직 계정이 없으신가요? <Link to="/signup">회원가입</Link>
-      </p>
-    </section>
+          <button type="submit" className="btn btn-primary" disabled={submitting}>
+            {submitting ? '로그인 중...' : '로그인'}
+          </button>
+        </form>
+        <p className="auth-switch">
+          아직 계정이 없으신가요? <Link to="/signup">회원가입</Link>
+        </p>
+      </div>
+    </div>
   )
 }

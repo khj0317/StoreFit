@@ -1,12 +1,17 @@
 :root {
-  --text: #3f3d45;
-  --text-h: #16141c;
+  --text: #52566b;
+  --text-h: #12143b;
   --bg: #ffffff;
-  --bg-subtle: #f7f6f9;
-  --border: #e3e1e8;
-  --accent: #7c3aed;
-  --accent-hover: #6d28d9;
-  --accent-bg: rgba(124, 58, 237, 0.08);
+  --bg-subtle: #f4f5fb;
+  --border: #e2e4ef;
+  --accent: #3b5bfd;
+  --accent-hover: #2d46d9;
+  --accent-bg: rgba(59, 91, 253, 0.08);
+  --secondary: #ffcc33;
+  --secondary-hover: #ffc107;
+  --secondary-text: #12143b;
+  --brand-accent-text: #b8860b;
+  --navy: #12143b;
   --danger: #dc2626;
   --danger-bg: rgba(220, 38, 38, 0.08);
   --success: #16a34a;
@@ -25,14 +30,19 @@
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --text: #d3d1d8;
-    --text-h: #f5f4f7;
-    --bg: #16151a;
-    --bg-subtle: #1f1e24;
-    --border: #33313a;
-    --accent: #a78bfa;
-    --accent-hover: #c4b5fd;
-    --accent-bg: rgba(167, 139, 250, 0.12);
+    --text: #b7b9c9;
+    --text-h: #f5f5fa;
+    --bg: #14152b;
+    --bg-subtle: #1c1e3a;
+    --border: #2e304f;
+    --accent: #7b93ff;
+    --accent-hover: #9cadff;
+    --accent-bg: rgba(123, 147, 255, 0.14);
+    --secondary: #ffd873;
+    --secondary-hover: #ffe19a;
+    --secondary-text: #12143b;
+    --brand-accent-text: #ffd873;
+    --navy: #0b0c1f;
     --danger: #f87171;
     --danger-bg: rgba(248, 113, 113, 0.12);
     --success: #4ade80;
