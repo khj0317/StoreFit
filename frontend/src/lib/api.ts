@@ -43,9 +43,16 @@ export interface ApiErrorResponse {
   message: string
 }
 
+const BACKEND_UNREACHABLE_MESSAGE = '백엔드 서버에 연결할 수 없습니다. 백엔드(http://localhost:8080)가 실행 중인지 확인해주세요.'
+
 export function getErrorMessage(error: unknown, fallback = '요청 처리 중 오류가 발생했습니다.'): string {
   if (axios.isAxiosError<ApiErrorResponse>(error)) {
-    return error.response?.data?.message ?? fallback
+    const message = error.response?.data?.message
+    if (message) return message
+    if (!error.response || error.response.status >= 500) {
+      return BACKEND_UNREACHABLE_MESSAGE
+    }
+    return fallback
   }
   return fallback
 }
