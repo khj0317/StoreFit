@@ -40,8 +40,23 @@ api.interceptors.request.use((config) => {
 
 export interface ApiErrorResponse {
   status: number
+  code: string
   message: string
 }
+
+api.interceptors.response.use(
+  (response) => response,
+  (error: unknown) => {
+    if (axios.isAxiosError<ApiErrorResponse>(error) && error.response?.data?.code === 'INVALID_TOKEN') {
+      clearStoredAuth()
+      if (window.location.pathname !== '/login') {
+        window.alert('로그인이 만료되었거나 세션이 유효하지 않습니다. 다시 로그인해주세요.')
+        window.location.href = '/login'
+      }
+    }
+    return Promise.reject(error)
+  },
+)
 
 const BACKEND_UNREACHABLE_MESSAGE = '백엔드 서버에 연결할 수 없습니다. 백엔드(http://localhost:8080)가 실행 중인지 확인해주세요.'
 

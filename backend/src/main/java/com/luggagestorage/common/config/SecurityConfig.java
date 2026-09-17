@@ -1,6 +1,7 @@
 package com.luggagestorage.common.config;
 
 import com.luggagestorage.auth.security.JwtAuthenticationFilter;
+import com.luggagestorage.common.exception.ErrorCode;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -13,8 +14,13 @@ import org.springframework.security.config.annotation.web.configurers.HeadersCon
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.web.AuthenticationEntryPoint;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.access.AccessDeniedHandler;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+
+import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
 
 @Configuration
 @RequiredArgsConstructor
@@ -53,11 +59,40 @@ public class SecurityConfig {
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public AccessDeniedHandler accessDeniedHandler() {
+        return (request, response, accessDeniedException) -> writeInvalidTokenResponse(response);
+    }
+
+    @Bean
+    public AuthenticationEntryPoint authenticationEntryPoint() {
+        return (request, response, authException) -> writeInvalidTokenResponse(response);
+    }
+
+    private static void writeInvalidTokenResponse(HttpServletResponse response) throws IOException {
+        ErrorCode errorCode = ErrorCode.INVALID_TOKEN;
+        response.setStatus(errorCode.getStatus().value());
+        response.setContentType("application/json;charset=UTF-8");
+        response.getWriter().write(
+            "{\"status\":" + errorCode.getStatus().value()
+                + ",\"code\":\"" + errorCode.name()
+                + "\",\"message\":\"" + errorCode.getMessage() + "\"}"
+        );
+    }
+
+    @Bean
+    public SecurityFilterChain filterChain(
+        HttpSecurity http,
+        AccessDeniedHandler accessDeniedHandler,
+        AuthenticationEntryPoint authenticationEntryPoint
+    ) throws Exception {
         http
             .csrf(csrf -> csrf.disable())
             .headers(headers -> headers.frameOptions(HeadersConfigurer.FrameOptionsConfig::disable))
             .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .exceptionHandling(exceptions -> exceptions
+                .accessDeniedHandler(accessDeniedHandler)
+                .authenticationEntryPoint(authenticationEntryPoint)
+            )
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers(PERMIT_ALL_PATHS).permitAll()
                 .requestMatchers(HttpMethod.GET, "/api/stores/me").authenticated()
