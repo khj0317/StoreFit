@@ -1,27 +1,71 @@
-import { useEffect, useState } from 'react'
-import { api } from './lib/api'
+import { Route, Routes } from 'react-router-dom'
 import './App.css'
+import { Navbar } from './components/Navbar'
+import { ProtectedRoute } from './components/ProtectedRoute'
+import { HomePage } from './pages/HomePage'
+import { HostReservationsPage } from './pages/HostReservationsPage'
+import { LoginPage } from './pages/LoginPage'
+import { MyReservationsPage } from './pages/MyReservationsPage'
+import { MyStoresPage } from './pages/MyStoresPage'
+import { NotFoundPage } from './pages/NotFoundPage'
+import { SignupPage } from './pages/SignupPage'
+import { StoreDetailPage } from './pages/StoreDetailPage'
+import { StoreFormPage } from './pages/StoreFormPage'
 
 function App() {
-  const [status, setStatus] = useState<'checking' | 'ok' | 'fail'>('checking')
-
-  useEffect(() => {
-    api
-      .get('/health')
-      .then(() => setStatus('ok'))
-      .catch(() => setStatus('fail'))
-  }, [])
-
   return (
-    <main style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
-      <h1>짐보관 플랫폼</h1>
-      <p>
-        백엔드 연결 상태:{' '}
-        {status === 'checking' && '확인 중...'}
-        {status === 'ok' && '✅ 연결 성공'}
-        {status === 'fail' && '❌ 연결 실패 (백엔드가 실행 중인지 확인하세요)'}
-      </p>
-    </main>
+    <div className="app-shell">
+      <Navbar />
+      <main className="app-content">
+        <Routes>
+          <Route path="/" element={<HomePage />} />
+          <Route path="/login" element={<LoginPage />} />
+          <Route path="/signup" element={<SignupPage />} />
+          <Route path="/stores/:storeId" element={<StoreDetailPage />} />
+          <Route
+            path="/my/stores"
+            element={
+              <ProtectedRoute>
+                <MyStoresPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/stores/new"
+            element={
+              <ProtectedRoute>
+                <StoreFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/stores/:storeId/edit"
+            element={
+              <ProtectedRoute>
+                <StoreFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/reservations"
+            element={
+              <ProtectedRoute>
+                <MyReservationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/host-reservations"
+            element={
+              <ProtectedRoute>
+                <HostReservationsPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="*" element={<NotFoundPage />} />
+        </Routes>
+      </main>
+    </div>
   )
 }
 

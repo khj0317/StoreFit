@@ -1,0 +1,45 @@
+import { Link, useNavigate } from 'react-router-dom'
+import { useAuth } from '../auth/AuthContext'
+
+export function Navbar() {
+  const { user, isAuthenticated, logout } = useAuth()
+  const navigate = useNavigate()
+
+  const handleLogout = () => {
+    logout()
+    navigate('/')
+  }
+
+  return (
+    <header className="navbar">
+      <Link to="/" className="navbar-brand">
+        짐보관 플랫폼
+      </Link>
+      <nav className="navbar-links">
+        <Link to="/">보관소 찾기</Link>
+        {isAuthenticated && <Link to="/my/reservations">내 예약</Link>}
+        {isAuthenticated && <Link to="/my/stores">내 보관소</Link>}
+        {isAuthenticated && <Link to="/my/host-reservations">호스트 예약 관리</Link>}
+      </nav>
+      <div className="navbar-actions">
+        {isAuthenticated ? (
+          <>
+            <span className="navbar-user">{user?.name}님</span>
+            <button type="button" className="btn btn-ghost" onClick={handleLogout}>
+              로그아웃
+            </button>
+          </>
+        ) : (
+          <>
+            <Link to="/login" className="btn btn-ghost">
+              로그인
+            </Link>
+            <Link to="/signup" className="btn btn-primary">
+              회원가입
+            </Link>
+          </>
+        )}
+      </div>
+    </header>
+  )
+}
