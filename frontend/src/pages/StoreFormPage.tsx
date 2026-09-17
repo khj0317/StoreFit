@@ -10,6 +10,7 @@ const EMPTY_FORM: StoreFormValues = {
   name: '',
   description: '',
   address: '',
+  addressDetail: '',
   imageUrls: [],
 }
 
@@ -17,7 +18,7 @@ function toRequest(form: StoreFormValues): StoreMutationRequest {
   return {
     name: form.name,
     description: form.description || null,
-    address: form.address,
+    address: [form.address, form.addressDetail].filter((part) => part.trim().length > 0).join(' '),
     imageUrls: form.imageUrls,
   }
 }
@@ -42,6 +43,7 @@ export function StoreFormPage() {
           name: store.name,
           description: store.description ?? '',
           address: store.address,
+          addressDetail: '',
           imageUrls: store.imageUrls,
         })
       })
@@ -142,6 +144,15 @@ export function StoreFormPage() {
                 주소 검색
               </button>
             </div>
+          </label>
+
+          <label className="form-group">
+            <span>상세주소 (선택)</span>
+            <input
+              value={form.addressDetail}
+              onChange={(e) => updateField('addressDetail', e.target.value)}
+              placeholder="동/호수 등 상세 주소"
+            />
           </label>
 
           <label className="form-group">

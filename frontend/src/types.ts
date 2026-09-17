@@ -53,6 +53,7 @@ export interface StoreFormValues {
   name: string
   description: string
   address: string
+  addressDetail: string
   imageUrls: string[]
 }
 
