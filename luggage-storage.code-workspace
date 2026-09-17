@@ -1,0 +1,16 @@
+{
+  "folders": [
+    { "name": "backend", "path": "backend" },
+    { "name": "frontend", "path": "frontend" }
+  ],
+  "extensions": {
+    "recommendations": [
+      "vscjava.vscode-java-pack",
+      "vscjava.vscode-spring-boot-dashboard",
+      "vscjava.vscode-gradle",
+      "dbaeumer.vscode-eslint",
+      "esbenp.prettier-vscode",
+      "redhat.vscode-yaml"
+    ]
+  }
+}
