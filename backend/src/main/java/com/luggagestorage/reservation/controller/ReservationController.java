@@ -34,24 +34,9 @@ public class ReservationController {
         return ResponseEntity.ok(reservationService.getMyReservations());
     }
 
-    @GetMapping("/host")
-    public ResponseEntity<List<ReservationResponse>> getHostReservations() {
-        return ResponseEntity.ok(reservationService.getHostReservations());
-    }
-
     @GetMapping("/{reservationId}")
     public ResponseEntity<ReservationResponse> getReservation(@PathVariable Long reservationId) {
         return ResponseEntity.ok(reservationService.getReservation(reservationId));
-    }
-
-    @PatchMapping("/{reservationId}/confirm")
-    public ResponseEntity<ReservationResponse> confirmReservation(@PathVariable Long reservationId) {
-        return ResponseEntity.ok(reservationService.confirmReservation(reservationId));
-    }
-
-    @PatchMapping("/{reservationId}/start")
-    public ResponseEntity<ReservationResponse> startReservation(@PathVariable Long reservationId) {
-        return ResponseEntity.ok(reservationService.startReservation(reservationId));
     }
 
     @PatchMapping("/{reservationId}/complete")

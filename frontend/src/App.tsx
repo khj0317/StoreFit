@@ -3,7 +3,6 @@ import './App.css'
 import { Navbar } from './components/Navbar'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { HomePage } from './pages/HomePage'
-import { HostReservationsPage } from './pages/HostReservationsPage'
 import { LoginPage } from './pages/LoginPage'
 import { MyReservationsPage } from './pages/MyReservationsPage'
 import { MyStoresPage } from './pages/MyStoresPage'
@@ -51,14 +50,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <MyReservationsPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/my/host-reservations"
-            element={
-              <ProtectedRoute>
-                <HostReservationsPage />
               </ProtectedRoute>
             }
           />

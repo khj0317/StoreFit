@@ -65,23 +65,11 @@ public class Reservation extends BaseTimeEntity {
         this.status = ReservationStatus.CANCELLED;
     }
 
-    public void confirm() {
-        this.status = ReservationStatus.CONFIRMED;
-    }
-
-    public void start() {
-        this.status = ReservationStatus.IN_PROGRESS;
-    }
-
     public void complete() {
         this.status = ReservationStatus.COMPLETED;
     }
 
     public boolean isOwnedBy(Long memberId) {
         return this.member.getId().equals(memberId);
-    }
-
-    public boolean isHostedBy(Long memberId) {
-        return this.store.isOwnedBy(memberId);
     }
 }

@@ -1,9 +1,7 @@
 import type { ReservationStatus } from '../types'
 
 const LABELS: Record<ReservationStatus, string> = {
-  PENDING: '대기중',
-  CONFIRMED: '확정됨',
-  IN_PROGRESS: '보관중',
+  PENDING: '이용중',
   COMPLETED: '완료됨',
   CANCELLED: '취소됨',
 }

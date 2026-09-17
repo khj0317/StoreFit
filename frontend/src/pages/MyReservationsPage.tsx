@@ -1,5 +1,5 @@
 import { type FormEvent, useEffect, useState } from 'react'
-import { cancelReservation, getMyReservations } from '../api/reservations'
+import { cancelReservation, completeReservation, getMyReservations } from '../api/reservations'
 import { createReview } from '../api/reviews'
 import { StatusBadge } from '../components/StatusBadge'
 import { getErrorMessage } from '../lib/api'
@@ -87,6 +87,16 @@ export function MyReservationsPage() {
     }
   }
 
+  const handleComplete = async (reservationId: number) => {
+    setActionError('')
+    try {
+      await completeReservation(reservationId)
+      load()
+    } catch (err) {
+      setActionError(getErrorMessage(err, '완료 처리에 실패했습니다.'))
+    }
+  }
+
   return (
     <section>
       <h1>내 예약</h1>
@@ -111,10 +121,15 @@ export function MyReservationsPage() {
               </div>
               <div className="list-item-actions">
                 <StatusBadge status={reservation.status} />
-                {(reservation.status === 'PENDING' || reservation.status === 'CONFIRMED') && (
-                  <button type="button" className="btn btn-danger" onClick={() => handleCancel(reservation.id)}>
-                    예약 취소
-                  </button>
+                {reservation.status === 'PENDING' && (
+                  <>
+                    <button type="button" className="btn btn-primary" onClick={() => handleComplete(reservation.id)}>
+                      이용 완료
+                    </button>
+                    <button type="button" className="btn btn-danger" onClick={() => handleCancel(reservation.id)}>
+                      예약 취소
+                    </button>
+                  </>
                 )}
               </div>
             </div>

@@ -55,47 +55,20 @@ public class ReservationService {
             .toList();
     }
 
-    public List<ReservationResponse> getHostReservations() {
-        Member host = getCurrentMember();
-        return reservationRepository.findByStore_HostOrderByCreatedAtDesc(host).stream()
-            .map(ReservationResponse::from)
-            .toList();
-    }
-
     public ReservationResponse getReservation(Long reservationId) {
         Reservation reservation = getReservationOrThrow(reservationId);
         Member current = getCurrentMember();
-        if (!reservation.isOwnedBy(current.getId()) && !reservation.isHostedBy(current.getId())) {
+        if (!reservation.isOwnedBy(current.getId())) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
         return ReservationResponse.from(reservation);
     }
 
     @Transactional
-    public ReservationResponse confirmReservation(Long reservationId) {
-        Reservation reservation = getReservationOrThrow(reservationId);
-        requireHost(reservation);
-        requireStatus(reservation, ReservationStatus.PENDING);
-
-        reservation.confirm();
-        return ReservationResponse.from(reservation);
-    }
-
-    @Transactional
-    public ReservationResponse startReservation(Long reservationId) {
-        Reservation reservation = getReservationOrThrow(reservationId);
-        requireHost(reservation);
-        requireStatus(reservation, ReservationStatus.CONFIRMED);
-
-        reservation.start();
-        return ReservationResponse.from(reservation);
-    }
-
-    @Transactional
     public ReservationResponse completeReservation(Long reservationId) {
         Reservation reservation = getReservationOrThrow(reservationId);
-        requireHost(reservation);
-        requireStatus(reservation, ReservationStatus.IN_PROGRESS);
+        requireOwner(reservation);
+        requireStatus(reservation, ReservationStatus.PENDING);
 
         reservation.complete();
         return ReservationResponse.from(reservation);
@@ -104,22 +77,16 @@ public class ReservationService {
     @Transactional
     public ReservationResponse cancelReservation(Long reservationId) {
         Reservation reservation = getReservationOrThrow(reservationId);
-        Member current = getCurrentMember();
-        if (!reservation.isOwnedBy(current.getId()) && !reservation.isHostedBy(current.getId())) {
-            throw new BusinessException(ErrorCode.ACCESS_DENIED);
-        }
-        if (reservation.getStatus() != ReservationStatus.PENDING
-            && reservation.getStatus() != ReservationStatus.CONFIRMED) {
-            throw new BusinessException(ErrorCode.INVALID_RESERVATION_STATUS);
-        }
+        requireOwner(reservation);
+        requireStatus(reservation, ReservationStatus.PENDING);
 
         reservation.cancel();
         return ReservationResponse.from(reservation);
     }
 
-    private void requireHost(Reservation reservation) {
+    private void requireOwner(Reservation reservation) {
         Member current = getCurrentMember();
-        if (!reservation.isHostedBy(current.getId())) {
+        if (!reservation.isOwnedBy(current.getId())) {
             throw new BusinessException(ErrorCode.ACCESS_DENIED);
         }
     }

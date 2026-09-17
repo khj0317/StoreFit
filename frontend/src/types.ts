@@ -53,10 +53,10 @@ export interface StoreFormValues {
   name: string
   description: string
   address: string
-  imageUrls: string
+  imageUrls: string[]
 }
 
-export type ReservationStatus = 'PENDING' | 'CONFIRMED' | 'IN_PROGRESS' | 'COMPLETED' | 'CANCELLED'
+export type ReservationStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED'
 
 export interface Reservation {
   id: number
