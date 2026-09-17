@@ -52,7 +52,10 @@ export function getErrorMessage(error: unknown, fallback = '요청 처리 중 �
     if (!error.response || error.response.status >= 500) {
       return BACKEND_UNREACHABLE_MESSAGE
     }
-    return fallback
+    return `${fallback} (HTTP ${error.response.status})`
+  }
+  if (error instanceof Error) {
+    return `${fallback} (${error.message})`
   }
   return fallback
 }
