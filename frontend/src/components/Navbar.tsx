@@ -17,7 +17,14 @@ export function Navbar() {
         <LogoMark />
         <Wordmark />
       </Link>
-      <nav className="navbar-links">{isAuthenticated && <Link to="/my/stores">내 짐 보관</Link>}</nav>
+      <nav className="navbar-links">
+        {isAuthenticated && (
+          <>
+            <Link to="/my/stores/new">짐 보관하기</Link>
+            <Link to="/my/stores">짐 보관 현황</Link>
+          </>
+        )}
+      </nav>
       <div className="navbar-actions">
         {isAuthenticated ? (
           <>

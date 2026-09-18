@@ -128,10 +128,7 @@ export function MyStoresPage() {
   return (
     <section>
       <div className="page-header">
-        <h1>내 짐 보관</h1>
-        <Link to="/my/stores/new" className="btn btn-primary">
-          내 짐 보관하기
-        </Link>
+        <h1>짐 보관 현황</h1>
       </div>
 
       {status === 'loading' && <p>불러오는 중...</p>}
