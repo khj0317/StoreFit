@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { beginStorage, cancelStore, completeStore, deleteStore, getMyStores, pickUpStore } from '../api/stores'
+import { beginStorage, completeStore, deleteStore, getMyStores, pickUpStore } from '../api/stores'
 import { createReview } from '../api/reviews'
 import { StatusBadge } from '../components/StatusBadge'
 import { STORE_CATEGORY_LABELS } from '../constants/storeCategories'
@@ -83,13 +83,14 @@ export function MyStoresPage() {
 
   useEffect(load, [])
 
-  const handleDelete = async (storeId: number) => {
-    if (!window.confirm('이 짐 보관 정보를 삭제하시겠습니까?')) return
+  const handleCancel = async (storeId: number) => {
+    if (!window.confirm('이 짐 보관을 취소하시겠습니까? 취소하면 삭제되어 되돌릴 수 없습니다.')) return
+    setActionError('')
     try {
       await deleteStore(storeId)
       load()
     } catch (err) {
-      window.alert(getErrorMessage(err, '삭제에 실패했습니다.'))
+      setActionError(getErrorMessage(err, '취소에 실패했습니다.'))
     }
   }
 
@@ -121,16 +122,6 @@ export function MyStoresPage() {
       load()
     } catch (err) {
       setActionError(getErrorMessage(err, '완료 처리에 실패했습니다.'))
-    }
-  }
-
-  const handleCancel = async (storeId: number) => {
-    setActionError('')
-    try {
-      await cancelStore(storeId)
-      load()
-    } catch (err) {
-      setActionError(getErrorMessage(err, '취소에 실패했습니다.'))
     }
   }
 
@@ -185,9 +176,6 @@ export function MyStoresPage() {
                         결제하기
                       </Link>
                     )}
-                    <button type="button" className="btn btn-danger" onClick={() => handleCancel(store.id)}>
-                      취소
-                    </button>
                   </>
                 )}
                 {store.status === 'PICKED_UP' && (
@@ -200,8 +188,8 @@ export function MyStoresPage() {
                     이용 완료
                   </button>
                 )}
-                <button type="button" className="btn btn-danger" onClick={() => handleDelete(store.id)}>
-                  삭제
+                <button type="button" className="btn btn-danger" onClick={() => handleCancel(store.id)}>
+                  취소
                 </button>
               </div>
             </div>

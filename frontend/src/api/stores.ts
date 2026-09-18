@@ -32,7 +32,3 @@ export function beginStorage(storeId: number) {
 export function completeStore(storeId: number) {
   return api.patch<StoreRecord>(`/stores/${storeId}/complete`).then((res) => res.data)
 }
-
-export function cancelStore(storeId: number) {
-  return api.patch<StoreRecord>(`/stores/${storeId}/cancel`).then((res) => res.data)
-}

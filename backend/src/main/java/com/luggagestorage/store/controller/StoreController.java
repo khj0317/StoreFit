@@ -70,9 +70,4 @@ public class StoreController {
     public ResponseEntity<StoreResponse> completeStore(@PathVariable Long storeId) {
         return ResponseEntity.ok(storeService.completeStore(storeId));
     }
-
-    @PatchMapping("/{storeId}/cancel")
-    public ResponseEntity<StoreResponse> cancelStore(@PathVariable Long storeId) {
-        return ResponseEntity.ok(storeService.cancelStore(storeId));
-    }
 }

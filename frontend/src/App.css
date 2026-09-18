@@ -581,11 +581,6 @@ select:focus {
   color: var(--success);
 }
 
-.badge-cancelled {
-  background: var(--danger-bg);
-  color: var(--danger);
-}
-
 .badge-category {
   background: var(--accent-bg);
   color: var(--accent);

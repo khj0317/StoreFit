@@ -2,7 +2,12 @@ spring:
   application:
     name: luggage-storage
   datasource:
-    url: jdbc:h2:file:./data/luggage;MODE=MySQL
+    # Absolute path anchored on the user's home directory -- deliberately NOT a relative
+    # path, since relative H2 file paths resolve against whatever the process's working
+    # directory happens to be (different between a terminal `cd backend && ./gradlew
+    # bootRun`, an IDE run configuration, or a packaged jar), which silently pointed each
+    # launch at a different/empty database and looked like data loss on restart.
+    url: jdbc:h2:file:${user.home}/.luggage-storage/luggage;MODE=MySQL
     driver-class-name: org.h2.Driver
     username: sa
     password:

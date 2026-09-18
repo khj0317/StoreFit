@@ -108,6 +108,8 @@ public class StoreService {
         Store store = getStoreOrThrow(storeId);
         requireOwner(store);
 
+        reviewRepository.findByStore(store).ifPresent(reviewRepository::delete);
+        paymentRepository.findByStore(store).ifPresent(paymentRepository::delete);
         storeImageRepository.deleteByStore(store);
         storeRepository.delete(store);
     }
@@ -140,16 +142,6 @@ public class StoreService {
         requireStatus(store, StoreStatus.IN_USE);
 
         store.complete();
-        return toResponse(store, imageUrlsOf(store));
-    }
-
-    @Transactional
-    public StoreResponse cancelStore(Long storeId) {
-        Store store = getStoreOrThrow(storeId);
-        requireOwner(store);
-        requireStatus(store, StoreStatus.PENDING);
-
-        store.cancel();
         return toResponse(store, imageUrlsOf(store));
     }
 

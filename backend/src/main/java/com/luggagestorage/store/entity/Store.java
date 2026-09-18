@@ -99,10 +99,6 @@ public class Store extends BaseTimeEntity {
         this.status = StoreStatus.COMPLETED;
     }
 
-    public void cancel() {
-        this.status = StoreStatus.CANCELLED;
-    }
-
     public boolean isOwnedBy(Long memberId) {
         return this.member.getId().equals(memberId);
     }

@@ -23,7 +23,7 @@ export interface LoginResponse {
   name: string
 }
 
-export type StoreStatus = 'PENDING' | 'PICKED_UP' | 'IN_USE' | 'COMPLETED' | 'CANCELLED'
+export type StoreStatus = 'PENDING' | 'PICKED_UP' | 'IN_USE' | 'COMPLETED'
 
 export type StoreCategory = 'LIGHT' | 'MEDIUM' | 'CLOTHES' | 'OTHER'
 
