@@ -56,6 +56,16 @@ public class StoreController {
         return ResponseEntity.noContent().build();
     }
 
+    @PatchMapping("/{storeId}/pickup")
+    public ResponseEntity<StoreResponse> pickUpStore(@PathVariable Long storeId) {
+        return ResponseEntity.ok(storeService.pickUpStore(storeId));
+    }
+
+    @PatchMapping("/{storeId}/store")
+    public ResponseEntity<StoreResponse> beginStorage(@PathVariable Long storeId) {
+        return ResponseEntity.ok(storeService.beginStorage(storeId));
+    }
+
     @PatchMapping("/{storeId}/complete")
     public ResponseEntity<StoreResponse> completeStore(@PathVariable Long storeId) {
         return ResponseEntity.ok(storeService.completeStore(storeId));

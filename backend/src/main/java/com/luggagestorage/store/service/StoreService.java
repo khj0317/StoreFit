@@ -105,10 +105,30 @@ public class StoreService {
     }
 
     @Transactional
-    public StoreResponse completeStore(Long storeId) {
+    public StoreResponse pickUpStore(Long storeId) {
         Store store = getStoreOrThrow(storeId);
         requireOwner(store);
         requireStatus(store, StoreStatus.PENDING);
+
+        store.pickUp();
+        return toResponse(store, imageUrlsOf(store));
+    }
+
+    @Transactional
+    public StoreResponse beginStorage(Long storeId) {
+        Store store = getStoreOrThrow(storeId);
+        requireOwner(store);
+        requireStatus(store, StoreStatus.PICKED_UP);
+
+        store.beginStorage();
+        return toResponse(store, imageUrlsOf(store));
+    }
+
+    @Transactional
+    public StoreResponse completeStore(Long storeId) {
+        Store store = getStoreOrThrow(storeId);
+        requireOwner(store);
+        requireStatus(store, StoreStatus.IN_USE);
 
         store.complete();
         return toResponse(store, imageUrlsOf(store));

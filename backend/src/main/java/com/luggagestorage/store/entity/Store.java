@@ -82,6 +82,14 @@ public class Store extends BaseTimeEntity {
         this.endDate = endDate;
     }
 
+    public void pickUp() {
+        this.status = StoreStatus.PICKED_UP;
+    }
+
+    public void beginStorage() {
+        this.status = StoreStatus.IN_USE;
+    }
+
     public void complete() {
         this.status = StoreStatus.COMPLETED;
     }

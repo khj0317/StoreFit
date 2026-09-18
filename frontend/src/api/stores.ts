@@ -21,6 +21,14 @@ export function deleteStore(storeId: number) {
   return api.delete(`/stores/${storeId}`).then(() => undefined)
 }
 
+export function pickUpStore(storeId: number) {
+  return api.patch<StoreRecord>(`/stores/${storeId}/pickup`).then((res) => res.data)
+}
+
+export function beginStorage(storeId: number) {
+  return api.patch<StoreRecord>(`/stores/${storeId}/store`).then((res) => res.data)
+}
+
 export function completeStore(storeId: number) {
   return api.patch<StoreRecord>(`/stores/${storeId}/complete`).then((res) => res.data)
 }

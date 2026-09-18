@@ -39,9 +39,11 @@ function Dashboard() {
     return <p className="error-text">{error}</p>
   }
 
-  const pending = stores.filter((store) => store.status === 'PENDING')
+  const inProgress = stores.filter(
+    (store) => store.status === 'PENDING' || store.status === 'PICKED_UP' || store.status === 'IN_USE',
+  )
   const completed = stores.filter((store) => store.status === 'COMPLETED')
-  const activePending = pending[0] ?? null
+  const active = inProgress[0] ?? null
 
   return (
     <section className="dashboard">
@@ -49,15 +51,15 @@ function Dashboard() {
       <div className="stat-grid">
         <div className="stat-tile">
           <span className="stat-label">보관 중인 짐</span>
-          <span className="stat-value">{pending.length}개</span>
+          <span className="stat-value">{inProgress.length}개</span>
         </div>
         <div className="stat-tile">
           <span className="stat-label">보관 시작일</span>
-          <span className="stat-value">{activePending?.startDate ?? '-'}</span>
+          <span className="stat-value">{active?.startDate ?? '-'}</span>
         </div>
         <div className="stat-tile">
           <span className="stat-label">보관 기간</span>
-          <span className="stat-value">{activePending ? `${daysSince(activePending.startDate)}일째` : '-'}</span>
+          <span className="stat-value">{active ? `${daysSince(active.startDate)}일째` : '-'}</span>
         </div>
         <div className="stat-tile">
           <span className="stat-label">완료한 보관</span>

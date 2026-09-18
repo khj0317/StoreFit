@@ -522,6 +522,16 @@ select:focus {
   color: var(--text-h);
 }
 
+.badge-picked_up {
+  background: var(--secondary);
+  color: var(--secondary-text);
+}
+
+.badge-in_use {
+  background: var(--accent-bg);
+  color: var(--accent);
+}
+
 .badge-completed {
   background: rgba(22, 163, 74, 0.12);
   color: var(--success);

@@ -1,6 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { cancelStore, completeStore, deleteStore, getMyStores } from '../api/stores'
+import { beginStorage, cancelStore, completeStore, deleteStore, getMyStores, pickUpStore } from '../api/stores'
 import { createReview } from '../api/reviews'
 import { StatusBadge } from '../components/StatusBadge'
 import { STORE_CATEGORY_LABELS } from '../constants/storeCategories'
@@ -93,7 +93,28 @@ export function MyStoresPage() {
     }
   }
 
+  const handlePickUp = async (storeId: number) => {
+    setActionError('')
+    try {
+      await pickUpStore(storeId)
+      load()
+    } catch (err) {
+      setActionError(getErrorMessage(err, '픽업 처리에 실패했습니다.'))
+    }
+  }
+
+  const handleBeginStorage = async (storeId: number) => {
+    setActionError('')
+    try {
+      await beginStorage(storeId)
+      load()
+    } catch (err) {
+      setActionError(getErrorMessage(err, '보관 처리에 실패했습니다.'))
+    }
+  }
+
   const handleComplete = async (storeId: number) => {
+    if (!window.confirm('이용을 완료 처리하시겠습니까? 완료 후에는 되돌릴 수 없습니다.')) return
     setActionError('')
     try {
       await completeStore(storeId)
@@ -153,13 +174,23 @@ export function MyStoresPage() {
                     <Link to={`/my/stores/${store.id}/edit`} className="btn btn-ghost">
                       수정
                     </Link>
-                    <button type="button" className="btn btn-primary" onClick={() => handleComplete(store.id)}>
-                      이용 완료
+                    <button type="button" className="btn btn-primary" onClick={() => handlePickUp(store.id)}>
+                      짐 픽업 완료
                     </button>
                     <button type="button" className="btn btn-danger" onClick={() => handleCancel(store.id)}>
                       취소
                     </button>
                   </>
+                )}
+                {store.status === 'PICKED_UP' && (
+                  <button type="button" className="btn btn-primary" onClick={() => handleBeginStorage(store.id)}>
+                    보관 완료
+                  </button>
+                )}
+                {store.status === 'IN_USE' && (
+                  <button type="button" className="btn btn-primary" onClick={() => handleComplete(store.id)}>
+                    이용 완료
+                  </button>
                 )}
                 <button type="button" className="btn btn-danger" onClick={() => handleDelete(store.id)}>
                   삭제

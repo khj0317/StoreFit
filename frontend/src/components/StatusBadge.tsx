@@ -1,7 +1,9 @@
 import type { StoreStatus } from '../types'
 
 const LABELS: Record<StoreStatus, string> = {
-  PENDING: '이용중',
+  PENDING: '예약중',
+  PICKED_UP: '픽업중',
+  IN_USE: '이용중',
   COMPLETED: '완료됨',
   CANCELLED: '취소됨',
 }
