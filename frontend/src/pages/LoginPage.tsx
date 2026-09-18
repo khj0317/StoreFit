@@ -8,7 +8,7 @@ export function LoginPage() {
   const navigate = useNavigate()
   const location = useLocation()
 
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -18,7 +18,7 @@ export function LoginPage() {
     setError('')
     setSubmitting(true)
     try {
-      await login(email, password)
+      await login(username, password)
       const from = (location.state as { from?: { pathname: string; search: string } } | null)?.from
       navigate(from ? `${from.pathname}${from.search}` : '/', { replace: true })
     } catch (err) {
@@ -34,8 +34,8 @@ export function LoginPage() {
         <h1>로그인</h1>
         <form className="form" onSubmit={handleSubmit}>
           <label className="form-group">
-            <span>이메일</span>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <span>아이디</span>
+            <input value={username} onChange={(e) => setUsername(e.target.value)} required />
           </label>
           <label className="form-group">
             <span>비밀번호</span>
@@ -48,6 +48,9 @@ export function LoginPage() {
             {submitting ? '로그인 중...' : '로그인'}
           </button>
         </form>
+        <p className="auth-switch">
+          <Link to="/find-username">아이디 찾기</Link> · <Link to="/reset-password">비밀번호 찾기</Link>
+        </p>
         <p className="auth-switch">
           아직 계정이 없으신가요? <Link to="/signup">회원가입</Link>
         </p>

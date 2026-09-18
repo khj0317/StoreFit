@@ -6,7 +6,7 @@ import type { SignupRequest } from '../types'
 interface AuthContextValue {
   user: StoredAuth | null
   isAuthenticated: boolean
-  login: (email: string, password: string) => Promise<void>
+  login: (username: string, password: string) => Promise<void>
   signup: (request: SignupRequest) => Promise<void>
   logout: () => void
 }
@@ -16,11 +16,11 @@ const AuthContext = createContext<AuthContextValue | null>(null)
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<StoredAuth | null>(() => loadStoredAuth())
 
-  const login = async (email: string, password: string) => {
-    const response = await authApi.login({ email, password })
+  const login = async (username: string, password: string) => {
+    const response = await authApi.login({ username, password })
     const auth: StoredAuth = {
       accessToken: response.accessToken,
-      email: response.email,
+      username: response.username,
       name: response.name,
     }
     saveStoredAuth(auth)
@@ -29,7 +29,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signup = async (request: SignupRequest) => {
     await authApi.signup(request)
-    await login(request.email, request.password)
+    await login(request.username, request.password)
   }
 
   const logout = () => {

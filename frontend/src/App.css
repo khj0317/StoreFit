@@ -251,6 +251,17 @@ select:focus {
   font-size: 14px;
 }
 
+.found-username {
+  text-align: center;
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--text-h);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px;
+  margin-bottom: 20px;
+}
+
 .centered-layout {
   min-height: calc(100svh - 200px);
   display: flex;

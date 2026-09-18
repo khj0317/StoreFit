@@ -213,8 +213,8 @@ public class StoreService {
     }
 
     private Member getCurrentMember() {
-        String email = SecurityUtil.getCurrentMemberEmail();
-        return memberRepository.findByEmail(email)
+        String username = SecurityUtil.getCurrentUsername();
+        return memberRepository.findByUsername(username)
             .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
 }

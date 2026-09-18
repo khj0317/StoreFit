@@ -4,7 +4,7 @@ const AUTH_STORAGE_KEY = 'luggage-storage-auth'
 
 export interface StoredAuth {
   accessToken: string
-  email: string
+  username: string
   name: string
 }
 

@@ -7,9 +7,10 @@ export function SignupPage() {
   const { signup } = useAuth()
   const navigate = useNavigate()
 
-  const [email, setEmail] = useState('')
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
+  const [email, setEmail] = useState('')
   const [phoneNumber, setPhoneNumber] = useState('')
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -19,7 +20,13 @@ export function SignupPage() {
     setError('')
     setSubmitting(true)
     try {
-      await signup({ email, password, name, phoneNumber: phoneNumber || undefined })
+      await signup({
+        username,
+        password,
+        name,
+        email: email || undefined,
+        phoneNumber: phoneNumber || undefined,
+      })
       navigate('/', { replace: true })
     } catch (err) {
       setError(getErrorMessage(err, '회원가입에 실패했습니다.'))
@@ -34,12 +41,15 @@ export function SignupPage() {
         <h1>회원가입</h1>
         <form className="form" onSubmit={handleSubmit}>
           <label className="form-group">
-            <span>이름</span>
-            <input value={name} onChange={(e) => setName(e.target.value)} required />
-          </label>
-          <label className="form-group">
-            <span>이메일</span>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
+            <span>아이디</span>
+            <input
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              minLength={4}
+              maxLength={20}
+              placeholder="영문, 숫자, 밑줄(_) 4~20자"
+              required
+            />
           </label>
           <label className="form-group">
             <span>비밀번호</span>
@@ -51,6 +61,14 @@ export function SignupPage() {
               maxLength={64}
               required
             />
+          </label>
+          <label className="form-group">
+            <span>이름</span>
+            <input value={name} onChange={(e) => setName(e.target.value)} required />
+          </label>
+          <label className="form-group">
+            <span>이메일 (선택, 아이디·비밀번호 찾기에 필요해요)</span>
+            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
           </label>
           <label className="form-group">
             <span>전화번호 (선택)</span>

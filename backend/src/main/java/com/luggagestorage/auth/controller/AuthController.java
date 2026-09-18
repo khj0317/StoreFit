@@ -5,6 +5,9 @@ import com.luggagestorage.auth.dto.LoginResponse;
 import com.luggagestorage.auth.security.JwtTokenProvider;
 import com.luggagestorage.common.exception.BusinessException;
 import com.luggagestorage.common.exception.ErrorCode;
+import com.luggagestorage.member.dto.FindUsernameRequest;
+import com.luggagestorage.member.dto.FindUsernameResponse;
+import com.luggagestorage.member.dto.ResetPasswordRequest;
 import com.luggagestorage.member.dto.SignupRequest;
 import com.luggagestorage.member.dto.SignupResponse;
 import com.luggagestorage.member.entity.Member;
@@ -41,16 +44,27 @@ public class AuthController {
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
         try {
             authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(request.email(), request.password())
+                new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
         } catch (AuthenticationException e) {
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
 
-        Member member = memberRepository.findByEmail(request.email())
+        Member member = memberRepository.findByUsername(request.username())
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
-        String accessToken = jwtTokenProvider.createAccessToken(member.getEmail(), member.getRole().name());
-        return ResponseEntity.ok(LoginResponse.of(accessToken, member.getEmail(), member.getName()));
+        String accessToken = jwtTokenProvider.createAccessToken(member.getUsername(), member.getRole().name());
+        return ResponseEntity.ok(LoginResponse.of(accessToken, member.getUsername(), member.getName()));
+    }
+
+    @PostMapping("/find-username")
+    public ResponseEntity<FindUsernameResponse> findUsername(@Valid @RequestBody FindUsernameRequest request) {
+        return ResponseEntity.ok(memberService.findUsername(request));
+    }
+
+    @PostMapping("/reset-password")
+    public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
+        memberService.resetPassword(request);
+        return ResponseEntity.ok().build();
     }
 }

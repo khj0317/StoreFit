@@ -27,12 +27,12 @@ public class JwtTokenProvider {
         this.key = Keys.hmacShaKeyFor(secret.getBytes());
     }
 
-    public String createAccessToken(String email, String role) {
+    public String createAccessToken(String username, String role) {
         Date now = new Date();
         Date expiry = new Date(now.getTime() + accessTokenExpirationMs);
 
         return Jwts.builder()
-            .subject(email)
+            .subject(username)
             .claim("role", role)
             .issuedAt(now)
             .expiration(expiry)
@@ -40,7 +40,7 @@ public class JwtTokenProvider {
             .compact();
     }
 
-    public String getEmail(String token) {
+    public String getUsername(String token) {
         return parseClaims(token).getSubject();
     }
 

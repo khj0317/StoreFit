@@ -2,12 +2,14 @@ import { Route, Routes } from 'react-router-dom'
 import './App.css'
 import { Navbar } from './components/Navbar'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { FindUsernamePage } from './pages/FindUsernamePage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyStoresPage } from './pages/MyStoresPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PaymentFailPage } from './pages/PaymentFailPage'
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage'
+import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { SignupPage } from './pages/SignupPage'
 import { StoreCategoryPage } from './pages/StoreCategoryPage'
 import { StoreFormPage } from './pages/StoreFormPage'
@@ -22,6 +24,8 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
+          <Route path="/find-username" element={<FindUsernamePage />} />
+          <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route
             path="/my/stores"
             element={

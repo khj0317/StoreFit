@@ -16,12 +16,12 @@ public class CustomUserDetailsService implements UserDetailsService {
     private final MemberRepository memberRepository;
 
     @Override
-    public UserDetails loadUserByUsername(String email) throws UsernameNotFoundException {
-        Member member = memberRepository.findByEmail(email)
-            .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 이메일입니다: " + email));
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        Member member = memberRepository.findByUsername(username)
+            .orElseThrow(() -> new UsernameNotFoundException("존재하지 않는 아이디입니다: " + username));
 
         return User.builder()
-            .username(member.getEmail())
+            .username(member.getUsername())
             .password(member.getPassword())
             .authorities("ROLE_" + member.getRole().name())
             .build();

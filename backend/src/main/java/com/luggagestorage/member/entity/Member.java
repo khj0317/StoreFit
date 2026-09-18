@@ -24,7 +24,7 @@ public class Member extends BaseTimeEntity {
     private Long id;
 
     @Column(nullable = false, unique = true)
-    private String email;
+    private String username;
 
     @Column(nullable = false)
     private String password;
@@ -32,21 +32,29 @@ public class Member extends BaseTimeEntity {
     @Column(nullable = false)
     private String name;
 
+    @Column(unique = true)
+    private String email;
+
     private String phoneNumber;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private MemberRole role;
 
-    public Member(String email, String password, String name, String phoneNumber, MemberRole role) {
-        this.email = email;
+    public Member(String username, String password, String name, String email, String phoneNumber, MemberRole role) {
+        this.username = username;
         this.password = password;
         this.name = name;
+        this.email = email;
         this.phoneNumber = phoneNumber;
         this.role = role;
     }
 
-    public static Member createUser(String email, String encodedPassword, String name, String phoneNumber) {
-        return new Member(email, encodedPassword, name, phoneNumber, MemberRole.USER);
+    public static Member createUser(String username, String encodedPassword, String name, String email, String phoneNumber) {
+        return new Member(username, encodedPassword, name, email, phoneNumber, MemberRole.USER);
+    }
+
+    public void changePassword(String encodedPassword) {
+        this.password = encodedPassword;
     }
 }

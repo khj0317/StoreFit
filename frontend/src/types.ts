@@ -1,26 +1,44 @@
 export interface SignupRequest {
-  email: string
+  username: string
   password: string
   name: string
+  email?: string
   phoneNumber?: string
 }
 
 export interface SignupResponse {
   id: number
-  email: string
+  username: string
   name: string
+  email: string | null
 }
 
 export interface LoginRequest {
-  email: string
+  username: string
   password: string
 }
 
 export interface LoginResponse {
   accessToken: string
   tokenType: string
+  username: string
+  name: string
+}
+
+export interface FindUsernameRequest {
   email: string
   name: string
+}
+
+export interface FindUsernameResponse {
+  username: string
+}
+
+export interface ResetPasswordRequest {
+  username: string
+  email: string
+  name: string
+  newPassword: string
 }
 
 export type StoreStatus = 'PENDING' | 'PICKED_UP' | 'IN_USE' | 'COMPLETED'
