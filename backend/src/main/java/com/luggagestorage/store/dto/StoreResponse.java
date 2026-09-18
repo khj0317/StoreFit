@@ -1,5 +1,6 @@
 package com.luggagestorage.store.dto;
 
+import com.luggagestorage.payment.entity.PaymentStatus;
 import com.luggagestorage.review.dto.ReviewSummary;
 import com.luggagestorage.store.entity.Store;
 import com.luggagestorage.store.entity.StoreCategory;
@@ -22,12 +23,14 @@ public record StoreResponse(
     LocalDate startDate,
     LocalDate endDate,
     StoreStatus status,
+    Integer totalPrice,
+    PaymentStatus paymentStatus,
     ReviewSummary review,
     LocalDateTime createdAt,
     LocalDateTime updatedAt
 ) {
 
-    public static StoreResponse of(Store store, List<String> imageUrls, ReviewSummary review) {
+    public static StoreResponse of(Store store, List<String> imageUrls, PaymentStatus paymentStatus, ReviewSummary review) {
         return new StoreResponse(
             store.getId(),
             store.getMember().getId(),
@@ -41,6 +44,8 @@ public record StoreResponse(
             store.getStartDate(),
             store.getEndDate(),
             store.getStatus(),
+            store.getTotalPrice(),
+            paymentStatus,
             review,
             store.getCreatedAt(),
             store.getUpdatedAt()

@@ -34,3 +34,8 @@ springdoc:
 jwt:
   secret: dev-only-secret-key-change-this-before-deploying-to-production-1234567890
   access-token-expiration-ms: 3600000
+
+# Toss Payments' own published sandbox test key (safe to share, no real merchant/money attached).
+# Replace with your real secret key from https://developers.tosspayments.com before going live.
+toss:
+  secret-key: test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R

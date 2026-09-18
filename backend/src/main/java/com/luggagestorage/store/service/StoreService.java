@@ -5,12 +5,16 @@ import com.luggagestorage.common.exception.BusinessException;
 import com.luggagestorage.common.exception.ErrorCode;
 import com.luggagestorage.member.entity.Member;
 import com.luggagestorage.member.repository.MemberRepository;
+import com.luggagestorage.payment.entity.Payment;
+import com.luggagestorage.payment.entity.PaymentStatus;
+import com.luggagestorage.payment.repository.PaymentRepository;
 import com.luggagestorage.review.dto.ReviewSummary;
 import com.luggagestorage.review.repository.ReviewRepository;
 import com.luggagestorage.store.dto.StoreCreateRequest;
 import com.luggagestorage.store.dto.StoreResponse;
 import com.luggagestorage.store.dto.StoreUpdateRequest;
 import com.luggagestorage.store.entity.Store;
+import com.luggagestorage.store.entity.StoreCategory;
 import com.luggagestorage.store.entity.StoreImage;
 import com.luggagestorage.store.entity.StoreStatus;
 import com.luggagestorage.store.repository.StoreImageRepository;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -31,6 +36,7 @@ public class StoreService {
     private final StoreRepository storeRepository;
     private final StoreImageRepository storeImageRepository;
     private final ReviewRepository reviewRepository;
+    private final PaymentRepository paymentRepository;
     private final MemberRepository memberRepository;
 
     @Transactional
@@ -46,7 +52,8 @@ public class StoreService {
             request.category(),
             request.luggageCount(),
             request.startDate(),
-            request.endDate()
+            request.endDate(),
+            calculateTotalPrice(request.category(), request.luggageCount(), request.startDate(), request.endDate())
         );
         storeRepository.save(store);
 
@@ -81,7 +88,8 @@ public class StoreService {
             request.category(),
             request.luggageCount(),
             request.startDate(),
-            request.endDate()
+            request.endDate(),
+            calculateTotalPrice(request.category(), request.luggageCount(), request.startDate(), request.endDate())
         );
 
         List<String> imageUrls;
@@ -109,6 +117,7 @@ public class StoreService {
         Store store = getStoreOrThrow(storeId);
         requireOwner(store);
         requireStatus(store, StoreStatus.PENDING);
+        requirePaid(store);
 
         store.pickUp();
         return toResponse(store, imageUrlsOf(store));
@@ -150,6 +159,20 @@ public class StoreService {
         }
     }
 
+    private int calculateTotalPrice(StoreCategory category, Integer luggageCount, LocalDate startDate, LocalDate endDate) {
+        long days = ChronoUnit.DAYS.between(startDate, endDate) + 1;
+        return (int) (category.getDailyRate() * luggageCount * days);
+    }
+
+    private void requirePaid(Store store) {
+        boolean paid = paymentRepository.findByStore(store)
+            .map(payment -> payment.getStatus() == PaymentStatus.DONE)
+            .orElse(false);
+        if (!paid) {
+            throw new BusinessException(ErrorCode.PAYMENT_REQUIRED);
+        }
+    }
+
     private List<String> saveImages(Store store, List<String> imageUrls) {
         if (imageUrls == null || imageUrls.isEmpty()) {
             return List.of();
@@ -173,7 +196,10 @@ public class StoreService {
         ReviewSummary review = reviewRepository.findByStore(store)
             .map(ReviewSummary::from)
             .orElse(null);
-        return StoreResponse.of(store, imageUrls, review);
+        PaymentStatus paymentStatus = paymentRepository.findByStore(store)
+            .map(Payment::getStatus)
+            .orElse(null);
+        return StoreResponse.of(store, imageUrls, paymentStatus, review);
     }
 
     private void requireOwner(Store store) {

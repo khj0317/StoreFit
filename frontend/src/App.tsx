@@ -6,9 +6,12 @@ import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
 import { MyStoresPage } from './pages/MyStoresPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { PaymentFailPage } from './pages/PaymentFailPage'
+import { PaymentSuccessPage } from './pages/PaymentSuccessPage'
 import { SignupPage } from './pages/SignupPage'
 import { StoreCategoryPage } from './pages/StoreCategoryPage'
 import { StoreFormPage } from './pages/StoreFormPage'
+import { StorePaymentPage } from './pages/StorePaymentPage'
 
 function App() {
   return (
@@ -48,6 +51,30 @@ function App() {
             element={
               <ProtectedRoute>
                 <StoreFormPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/stores/:storeId/pay"
+            element={
+              <ProtectedRoute>
+                <StorePaymentPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/stores/:storeId/pay/success"
+            element={
+              <ProtectedRoute>
+                <PaymentSuccessPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/stores/:storeId/pay/fail"
+            element={
+              <ProtectedRoute>
+                <PaymentFailPage />
               </ProtectedRoute>
             }
           />

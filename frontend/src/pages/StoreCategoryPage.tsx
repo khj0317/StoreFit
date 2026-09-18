@@ -19,6 +19,7 @@ export function StoreCategoryPage() {
           >
             <strong>{category.label}</strong>
             <span>{category.description}</span>
+            <span className="category-card-price">{category.dailyRate.toLocaleString()}원 / 일</span>
           </button>
         ))}
       </div>

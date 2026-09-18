@@ -246,6 +246,11 @@ select:focus {
   font-size: 14px;
 }
 
+.success-text {
+  color: var(--success);
+  font-size: 14px;
+}
+
 .centered-layout {
   min-height: calc(100svh - 200px);
   display: flex;
@@ -329,10 +334,49 @@ select:focus {
   color: var(--text);
 }
 
+.category-card .category-card-price {
+  font-weight: 600;
+  color: var(--accent);
+}
+
 .category-selected-row {
   display: flex;
   align-items: center;
   gap: 12px;
+}
+
+/* Payment */
+
+.payment-summary {
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.payment-summary-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 14px;
+}
+
+.payment-summary-row span:first-child {
+  color: var(--text);
+}
+
+.payment-summary-total {
+  border-top: 1px solid var(--border);
+  padding-top: 10px;
+  font-weight: 700;
+  font-size: 16px;
+}
+
+.payment-summary-row.payment-summary-total span {
+  color: var(--text-h);
 }
 
 /* Dashboard */

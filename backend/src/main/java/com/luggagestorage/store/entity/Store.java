@@ -58,8 +58,11 @@ public class Store extends BaseTimeEntity {
     @Column(nullable = false)
     private StoreStatus status;
 
+    @Column(nullable = false)
+    private Integer totalPrice;
+
     public Store(Member member, String name, String description, String address, StoreCategory category,
-                 Integer luggageCount, LocalDate startDate, LocalDate endDate) {
+                 Integer luggageCount, LocalDate startDate, LocalDate endDate, Integer totalPrice) {
         this.member = member;
         this.name = name;
         this.description = description;
@@ -69,10 +72,11 @@ public class Store extends BaseTimeEntity {
         this.startDate = startDate;
         this.endDate = endDate;
         this.status = StoreStatus.PENDING;
+        this.totalPrice = totalPrice;
     }
 
     public void update(String name, String description, String address, StoreCategory category,
-                        Integer luggageCount, LocalDate startDate, LocalDate endDate) {
+                        Integer luggageCount, LocalDate startDate, LocalDate endDate, Integer totalPrice) {
         this.name = name;
         this.description = description;
         this.address = address;
@@ -80,6 +84,7 @@ public class Store extends BaseTimeEntity {
         this.luggageCount = luggageCount;
         this.startDate = startDate;
         this.endDate = endDate;
+        this.totalPrice = totalPrice;
     }
 
     public void pickUp() {

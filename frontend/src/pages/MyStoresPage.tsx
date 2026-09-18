@@ -163,7 +163,9 @@ export function MyStoresPage() {
                   <p>
                     {store.startDate} ~ {store.endDate}
                   </p>
-                  <p>짐 {store.luggageCount}개</p>
+                  <p>
+                    짐 {store.luggageCount}개 · {store.totalPrice.toLocaleString()}원
+                  </p>
                   {store.description && <p>{store.description}</p>}
                 </div>
               </div>
@@ -174,9 +176,15 @@ export function MyStoresPage() {
                     <Link to={`/my/stores/${store.id}/edit`} className="btn btn-ghost">
                       수정
                     </Link>
-                    <button type="button" className="btn btn-primary" onClick={() => handlePickUp(store.id)}>
-                      짐 픽업 완료
-                    </button>
+                    {store.paymentStatus === 'DONE' ? (
+                      <button type="button" className="btn btn-primary" onClick={() => handlePickUp(store.id)}>
+                        짐 픽업 완료
+                      </button>
+                    ) : (
+                      <Link to={`/my/stores/${store.id}/pay`} className="btn btn-secondary">
+                        결제하기
+                      </Link>
+                    )}
                     <button type="button" className="btn btn-danger" onClick={() => handleCancel(store.id)}>
                       취소
                     </button>
