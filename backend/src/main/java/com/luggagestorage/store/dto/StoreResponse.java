@@ -2,8 +2,10 @@ package com.luggagestorage.store.dto;
 
 import com.luggagestorage.review.dto.ReviewSummary;
 import com.luggagestorage.store.entity.Store;
+import com.luggagestorage.store.entity.StoreCategory;
 import com.luggagestorage.store.entity.StoreStatus;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -15,9 +17,10 @@ public record StoreResponse(
     String description,
     String address,
     List<String> imageUrls,
+    StoreCategory category,
     Integer luggageCount,
-    LocalDateTime startTime,
-    LocalDateTime endTime,
+    LocalDate startDate,
+    LocalDate endDate,
     StoreStatus status,
     ReviewSummary review,
     LocalDateTime createdAt,
@@ -33,9 +36,10 @@ public record StoreResponse(
             store.getDescription(),
             store.getAddress(),
             imageUrls,
+            store.getCategory(),
             store.getLuggageCount(),
-            store.getStartTime(),
-            store.getEndTime(),
+            store.getStartDate(),
+            store.getEndDate(),
             store.getStatus(),
             review,
             store.getCreatedAt(),

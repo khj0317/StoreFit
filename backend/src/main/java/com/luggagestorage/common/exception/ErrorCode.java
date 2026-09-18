@@ -10,7 +10,7 @@ public enum ErrorCode {
     INVALID_TOKEN(HttpStatus.UNAUTHORIZED, "유효하지 않은 토큰입니다."),
     STORE_NOT_FOUND(HttpStatus.NOT_FOUND, "존재하지 않는 짐 보관입니다."),
     ACCESS_DENIED(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-    INVALID_STORE_TIME(HttpStatus.BAD_REQUEST, "시작/종료 시간이 올바르지 않습니다."),
+    INVALID_STORE_TIME(HttpStatus.BAD_REQUEST, "시작/종료 날짜가 올바르지 않습니다."),
     INVALID_STORE_STATUS(HttpStatus.BAD_REQUEST, "처리할 수 없는 상태입니다."),
     STORE_NOT_COMPLETED(HttpStatus.BAD_REQUEST, "완료된 짐 보관에만 리뷰를 작성할 수 있습니다."),
     DUPLICATE_REVIEW(HttpStatus.CONFLICT, "이미 리뷰를 작성했습니다."),

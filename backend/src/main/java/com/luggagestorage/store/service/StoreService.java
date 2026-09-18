@@ -19,7 +19,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -36,16 +36,17 @@ public class StoreService {
     @Transactional
     public StoreResponse createStore(StoreCreateRequest request) {
         Member member = getCurrentMember();
-        validateTimeRange(request.startTime(), request.endTime());
+        validateDateRange(request.startDate(), request.endDate());
 
         Store store = new Store(
             member,
             request.name(),
             request.description(),
             request.address(),
+            request.category(),
             request.luggageCount(),
-            request.startTime(),
-            request.endTime()
+            request.startDate(),
+            request.endDate()
         );
         storeRepository.save(store);
 
@@ -71,15 +72,16 @@ public class StoreService {
         Store store = getStoreOrThrow(storeId);
         requireOwner(store);
         requireStatus(store, StoreStatus.PENDING);
-        validateTimeRange(request.startTime(), request.endTime());
+        validateDateRange(request.startDate(), request.endDate());
 
         store.update(
             request.name(),
             request.description(),
             request.address(),
+            request.category(),
             request.luggageCount(),
-            request.startTime(),
-            request.endTime()
+            request.startDate(),
+            request.endDate()
         );
 
         List<String> imageUrls;
@@ -122,8 +124,8 @@ public class StoreService {
         return toResponse(store, imageUrlsOf(store));
     }
 
-    private void validateTimeRange(LocalDateTime startTime, LocalDateTime endTime) {
-        if (!endTime.isAfter(startTime)) {
+    private void validateDateRange(LocalDate startDate, LocalDate endDate) {
+        if (endDate.isBefore(startDate)) {
             throw new BusinessException(ErrorCode.INVALID_STORE_TIME);
         }
     }

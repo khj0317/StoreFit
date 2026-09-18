@@ -1,20 +1,30 @@
 import { type ChangeEvent, type FormEvent, useEffect, useState } from 'react'
-import { useNavigate, useParams } from 'react-router-dom'
+import { Link, useNavigate, useParams } from 'react-router-dom'
 import { createStore, getStore, updateStore } from '../api/stores'
 import { uploadImages } from '../api/uploads'
+import { STORE_CATEGORIES, STORE_CATEGORY_LABELS } from '../constants/storeCategories'
 import { openAddressSearch } from '../lib/daumPostcode'
 import { getErrorMessage } from '../lib/api'
-import type { StoreFormValues, StoreMutationRequest } from '../types'
+import type { StoreCategory, StoreFormValues, StoreMutationRequest } from '../types'
 
-const EMPTY_FORM: StoreFormValues = {
-  name: '',
-  description: '',
-  address: '',
-  addressDetail: '',
-  imageUrls: [],
-  luggageCount: '1',
-  startTime: '',
-  endTime: '',
+const VALID_CATEGORIES = new Set<string>(STORE_CATEGORIES.map((category) => category.value))
+
+function isStoreCategory(value: string | undefined): value is StoreCategory {
+  return value !== undefined && VALID_CATEGORIES.has(value)
+}
+
+function emptyForm(category: StoreCategory): StoreFormValues {
+  return {
+    name: '',
+    description: '',
+    address: '',
+    addressDetail: '',
+    imageUrls: [],
+    category,
+    luggageCount: '1',
+    startDate: '',
+    endDate: '',
+  }
 }
 
 function toRequest(form: StoreFormValues): StoreMutationRequest {
@@ -23,24 +33,31 @@ function toRequest(form: StoreFormValues): StoreMutationRequest {
     description: form.description || null,
     address: [form.address, form.addressDetail].filter((part) => part.trim().length > 0).join(' '),
     imageUrls: form.imageUrls,
+    category: form.category,
     luggageCount: Number(form.luggageCount),
-    startTime: form.startTime,
-    endTime: form.endTime,
+    startDate: form.startDate,
+    endDate: form.endDate,
   }
 }
 
 export function StoreFormPage() {
-  const { storeId } = useParams<{ storeId: string }>()
+  const { storeId, category: categoryParam } = useParams<{ storeId: string; category: string }>()
   const isEdit = storeId !== undefined
   const navigate = useNavigate()
 
-  const [form, setForm] = useState<StoreFormValues>(EMPTY_FORM)
+  const [form, setForm] = useState<StoreFormValues>(() => emptyForm(isStoreCategory(categoryParam) ? categoryParam : 'OTHER'))
   const [locked, setLocked] = useState(false)
   const [error, setError] = useState('')
   const [submitting, setSubmitting] = useState(false)
   const [loading, setLoading] = useState(isEdit)
   const [uploading, setUploading] = useState(false)
   const [uploadError, setUploadError] = useState('')
+
+  useEffect(() => {
+    if (!isEdit && !isStoreCategory(categoryParam)) {
+      navigate('/my/stores/new', { replace: true })
+    }
+  }, [isEdit, categoryParam, navigate])
 
   useEffect(() => {
     if (!isEdit) return
@@ -52,9 +69,10 @@ export function StoreFormPage() {
           address: store.address,
           addressDetail: '',
           imageUrls: store.imageUrls,
+          category: store.category,
           luggageCount: store.luggageCount.toString(),
-          startTime: store.startTime.slice(0, 16),
-          endTime: store.endTime.slice(0, 16),
+          startDate: store.startDate,
+          endDate: store.endDate,
         })
         setLocked(store.status !== 'PENDING')
       })
@@ -132,6 +150,24 @@ export function StoreFormPage() {
       <div className="centered-card">
         <h1>{isEdit ? '내 짐 보관 수정' : '내 짐 보관'}</h1>
         <form className="form" onSubmit={handleSubmit}>
+          <div className="form-group">
+            <span>짐 종류</span>
+            {isEdit ? (
+              <select value={form.category} onChange={(e) => updateField('category', e.target.value as StoreCategory)}>
+                {STORE_CATEGORIES.map((category) => (
+                  <option key={category.value} value={category.value}>
+                    {category.label}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="category-selected-row">
+                <span className="badge badge-category">{STORE_CATEGORY_LABELS[form.category]}</span>
+                <Link to="/my/stores/new">종류 변경</Link>
+              </div>
+            )}
+          </div>
+
           <label className="form-group">
             <span>제목</span>
             <input value={form.name} onChange={(e) => updateField('name', e.target.value)} required />
@@ -181,37 +217,30 @@ export function StoreFormPage() {
             />
           </label>
 
-          <div className="form-row">
-            <label className="form-group">
-              <span>짐 개수</span>
-              <input
-                type="number"
-                min={1}
-                value={form.luggageCount}
-                onChange={(e) => updateField('luggageCount', e.target.value)}
-                required
-              />
-            </label>
-          </div>
+          <label className="form-group">
+            <span>짐 개수</span>
+            <input
+              type="number"
+              min={1}
+              value={form.luggageCount}
+              onChange={(e) => updateField('luggageCount', e.target.value)}
+              required
+            />
+          </label>
 
           <div className="form-row">
             <label className="form-group">
-              <span>시작 시간</span>
+              <span>시작 날짜</span>
               <input
-                type="datetime-local"
-                value={form.startTime}
-                onChange={(e) => updateField('startTime', e.target.value)}
+                type="date"
+                value={form.startDate}
+                onChange={(e) => updateField('startDate', e.target.value)}
                 required
               />
             </label>
             <label className="form-group">
-              <span>종료 시간</span>
-              <input
-                type="datetime-local"
-                value={form.endTime}
-                onChange={(e) => updateField('endTime', e.target.value)}
-                required
-              />
+              <span>종료 날짜</span>
+              <input type="date" value={form.endDate} onChange={(e) => updateField('endDate', e.target.value)} required />
             </label>
           </div>
 

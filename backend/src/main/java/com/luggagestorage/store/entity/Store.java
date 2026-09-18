@@ -17,7 +17,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Entity
 @Table(name = "stores")
@@ -41,39 +41,45 @@ public class Store extends BaseTimeEntity {
     @Column(nullable = false)
     private String address;
 
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StoreCategory category;
+
     @Column(nullable = false)
     private Integer luggageCount;
 
     @Column(nullable = false)
-    private LocalDateTime startTime;
+    private LocalDate startDate;
 
     @Column(nullable = false)
-    private LocalDateTime endTime;
+    private LocalDate endDate;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private StoreStatus status;
 
-    public Store(Member member, String name, String description, String address,
-                 Integer luggageCount, LocalDateTime startTime, LocalDateTime endTime) {
+    public Store(Member member, String name, String description, String address, StoreCategory category,
+                 Integer luggageCount, LocalDate startDate, LocalDate endDate) {
         this.member = member;
         this.name = name;
         this.description = description;
         this.address = address;
+        this.category = category;
         this.luggageCount = luggageCount;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startDate = startDate;
+        this.endDate = endDate;
         this.status = StoreStatus.PENDING;
     }
 
-    public void update(String name, String description, String address,
-                        Integer luggageCount, LocalDateTime startTime, LocalDateTime endTime) {
+    public void update(String name, String description, String address, StoreCategory category,
+                        Integer luggageCount, LocalDate startDate, LocalDate endDate) {
         this.name = name;
         this.description = description;
         this.address = address;
+        this.category = category;
         this.luggageCount = luggageCount;
-        this.startTime = startTime;
-        this.endTime = endTime;
+        this.startDate = startDate;
+        this.endDate = endDate;
     }
 
     public void complete() {

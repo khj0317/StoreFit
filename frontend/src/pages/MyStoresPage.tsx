@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { cancelStore, completeStore, deleteStore, getMyStores } from '../api/stores'
 import { createReview } from '../api/reviews'
 import { StatusBadge } from '../components/StatusBadge'
+import { STORE_CATEGORY_LABELS } from '../constants/storeCategories'
 import { getErrorMessage } from '../lib/api'
 import type { StoreRecord } from '../types'
 
@@ -136,9 +137,10 @@ export function MyStoresPage() {
                 )}
                 <div>
                   <strong>{store.name}</strong>
+                  <span className="badge badge-category">{STORE_CATEGORY_LABELS[store.category]}</span>
                   <p className="store-card-address">{store.address}</p>
                   <p>
-                    {store.startTime.replace('T', ' ')} ~ {store.endTime.replace('T', ' ')}
+                    {store.startDate} ~ {store.endDate}
                   </p>
                   <p>짐 {store.luggageCount}개</p>
                   {store.description && <p>{store.description}</p>}

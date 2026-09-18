@@ -25,6 +25,8 @@ export interface LoginResponse {
 
 export type StoreStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED'
 
+export type StoreCategory = 'LIGHT' | 'MEDIUM' | 'CLOTHES' | 'OTHER'
+
 export interface ReviewSummary {
   id: number
   rating: number
@@ -40,9 +42,10 @@ export interface StoreRecord {
   description: string | null
   address: string
   imageUrls: string[]
+  category: StoreCategory
   luggageCount: number
-  startTime: string
-  endTime: string
+  startDate: string
+  endDate: string
   status: StoreStatus
   review: ReviewSummary | null
   createdAt: string
@@ -54,9 +57,10 @@ export interface StoreMutationRequest {
   description: string | null
   address: string
   imageUrls: string[]
+  category: StoreCategory
   luggageCount: number
-  startTime: string
-  endTime: string
+  startDate: string
+  endDate: string
 }
 
 export interface StoreFormValues {
@@ -65,9 +69,10 @@ export interface StoreFormValues {
   address: string
   addressDetail: string
   imageUrls: string[]
+  category: StoreCategory
   luggageCount: string
-  startTime: string
-  endTime: string
+  startDate: string
+  endDate: string
 }
 
 export interface ReviewCreateRequest {

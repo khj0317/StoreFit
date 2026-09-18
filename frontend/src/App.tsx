@@ -7,6 +7,7 @@ import { LoginPage } from './pages/LoginPage'
 import { MyStoresPage } from './pages/MyStoresPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { SignupPage } from './pages/SignupPage'
+import { StoreCategoryPage } from './pages/StoreCategoryPage'
 import { StoreFormPage } from './pages/StoreFormPage'
 
 function App() {
@@ -28,6 +29,14 @@ function App() {
           />
           <Route
             path="/my/stores/new"
+            element={
+              <ProtectedRoute>
+                <StoreCategoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/stores/new/:category"
             element={
               <ProtectedRoute>
                 <StoreFormPage />
