@@ -42,7 +42,6 @@ function Dashboard() {
   const inProgress = stores.filter(
     (store) => store.status === 'PENDING' || store.status === 'PICKED_UP' || store.status === 'IN_USE',
   )
-  const completed = stores.filter((store) => store.status === 'COMPLETED')
   const active = inProgress[0] ?? null
 
   return (
@@ -62,8 +61,8 @@ function Dashboard() {
           <span className="stat-value">{active ? `${daysSince(active.startDate)}일째` : '-'}</span>
         </div>
         <div className="stat-tile">
-          <span className="stat-label">완료한 보관</span>
-          <span className="stat-value">{completed.length}건</span>
+          <span className="stat-label">보관 상태</span>
+          <span className="stat-value">{active ? <StatusBadge status={active.status} /> : '-'}</span>
         </div>
       </div>
 
