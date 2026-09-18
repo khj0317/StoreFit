@@ -6,14 +6,6 @@ import { StatusBadge } from '../components/StatusBadge'
 import { getErrorMessage } from '../lib/api'
 import type { StoreRecord } from '../types'
 
-function daysSince(dateStr: string): number {
-  const start = new Date(dateStr)
-  start.setHours(0, 0, 0, 0)
-  const today = new Date()
-  today.setHours(0, 0, 0, 0)
-  return Math.max(0, Math.round((today.getTime() - start.getTime()) / 86_400_000)) + 1
-}
-
 function Dashboard() {
   const [stores, setStores] = useState<StoreRecord[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
@@ -39,35 +31,10 @@ function Dashboard() {
     return <p className="error-text">{error}</p>
   }
 
-  const inProgress = stores.filter(
-    (store) => store.status === 'PENDING' || store.status === 'PICKED_UP' || store.status === 'IN_USE',
-  )
-  const active = inProgress[0] ?? null
-
   return (
     <section className="dashboard">
-      <h2>내 보관 현황</h2>
-      <div className="stat-grid">
-        <div className="stat-tile">
-          <span className="stat-label">보관 중인 짐</span>
-          <span className="stat-value">{inProgress.length}개</span>
-        </div>
-        <div className="stat-tile">
-          <span className="stat-label">보관 시작일</span>
-          <span className="stat-value">{active?.startDate ?? '-'}</span>
-        </div>
-        <div className="stat-tile">
-          <span className="stat-label">보관 기간</span>
-          <span className="stat-value">{active ? `${daysSince(active.startDate)}일째` : '-'}</span>
-        </div>
-        <div className="stat-tile">
-          <span className="stat-label">보관 상태</span>
-          <span className="stat-value">{active ? <StatusBadge status={active.status} /> : '-'}</span>
-        </div>
-      </div>
-
       <div className="page-header">
-        <h2>보관 물품 상태</h2>
+        <h2>내 보관 현황</h2>
         <Link to="/my/stores">전체보기</Link>
       </div>
       {stores.length === 0 ? (
@@ -76,7 +43,12 @@ function Dashboard() {
         <ul className="status-list">
           {stores.slice(0, 5).map((store) => (
             <li key={store.id} className="status-list-item">
-              <span>{store.name}</span>
+              <div>
+                <strong>{store.name}</strong>
+                <p className="store-card-address">
+                  {store.startDate} ~ {store.endDate}
+                </p>
+              </div>
               <StatusBadge status={store.status} />
             </li>
           ))}

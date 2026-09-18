@@ -396,33 +396,6 @@ select:focus {
   margin-top: 8px;
 }
 
-.stat-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-  gap: 12px;
-  margin-bottom: 32px;
-}
-
-.stat-tile {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 16px;
-}
-
-.stat-label {
-  font-size: 13px;
-  color: var(--text);
-}
-
-.stat-value {
-  font-size: 20px;
-  font-weight: 700;
-  color: var(--text-h);
-}
-
 .status-list {
   list-style: none;
   display: flex;
