@@ -4,11 +4,9 @@ import { Navbar } from './components/Navbar'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
-import { MyReservationsPage } from './pages/MyReservationsPage'
 import { MyStoresPage } from './pages/MyStoresPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { SignupPage } from './pages/SignupPage'
-import { StoreDetailPage } from './pages/StoreDetailPage'
 import { StoreFormPage } from './pages/StoreFormPage'
 
 function App() {
@@ -20,7 +18,6 @@ function App() {
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />
           <Route path="/signup" element={<SignupPage />} />
-          <Route path="/stores/:storeId" element={<StoreDetailPage />} />
           <Route
             path="/my/stores"
             element={
@@ -42,14 +39,6 @@ function App() {
             element={
               <ProtectedRoute>
                 <StoreFormPage />
-              </ProtectedRoute>
-            }
-          />
-          <Route
-            path="/my/reservations"
-            element={
-              <ProtectedRoute>
-                <MyReservationsPage />
               </ProtectedRoute>
             }
           />

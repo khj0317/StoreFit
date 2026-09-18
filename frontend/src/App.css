@@ -246,11 +246,6 @@ select:focus {
   font-size: 14px;
 }
 
-.success-text {
-  color: var(--success);
-  font-size: 14px;
-}
-
 .centered-layout {
   min-height: calc(100svh - 200px);
   display: flex;
@@ -291,12 +286,6 @@ select:focus {
   justify-content: space-between;
   gap: 16px;
   margin-bottom: 20px;
-}
-
-.card {
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 20px;
 }
 
 /* Hero */
@@ -345,88 +334,24 @@ select:focus {
   }
 }
 
-/* Store grid */
-
-.store-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
-  gap: 16px;
-  margin-top: 16px;
-}
-
-.store-card {
-  display: block;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  overflow: hidden;
-  color: var(--text);
-}
-
-.store-card:hover {
-  border-color: var(--accent);
-  text-decoration: none;
-}
-
-.store-card-thumb {
-  aspect-ratio: 4 / 3;
-  background: var(--bg-subtle);
-}
-
-.store-card-thumb img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  display: block;
-}
-
-.store-card-thumb-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--text);
-  font-size: 13px;
-}
-
-.store-card-body {
-  padding: 12px 14px;
-}
-
 .store-card-address {
   font-size: 13px;
   color: var(--text);
 }
 
-/* Store detail */
+/* Store record list items */
 
-.store-detail-header {
-  margin-bottom: 20px;
-}
-
-.store-detail-images {
+.store-record-info {
   display: flex;
   gap: 12px;
-  overflow-x: auto;
-  margin-bottom: 24px;
 }
 
-.store-detail-images img {
-  height: 180px;
-  border-radius: 10px;
+.store-record-thumb {
+  width: 72px;
+  height: 72px;
+  border-radius: 8px;
   object-fit: cover;
-}
-
-.store-detail-columns {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-@media (max-width: 720px) {
-  .store-detail-columns {
-    grid-template-columns: 1fr;
-  }
+  flex-shrink: 0;
 }
 
 /* Lists */
@@ -470,13 +395,6 @@ select:focus {
 }
 
 /* Reviews */
-
-.review-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
 
 .review-item {
   border-bottom: 1px solid var(--border);

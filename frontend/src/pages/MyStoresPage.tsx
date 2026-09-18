@@ -1,13 +1,71 @@
-import { useEffect, useState } from 'react'
+import { type FormEvent, useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
-import { deleteStore, getMyStores } from '../api/stores'
+import { cancelStore, completeStore, deleteStore, getMyStores } from '../api/stores'
+import { createReview } from '../api/reviews'
+import { StatusBadge } from '../components/StatusBadge'
 import { getErrorMessage } from '../lib/api'
-import type { StoreSummary } from '../types'
+import type { StoreRecord } from '../types'
+
+function ReviewForm({ storeId, onSubmitted }: { storeId: number; onSubmitted: () => void }) {
+  const [rating, setRating] = useState('5')
+  const [content, setContent] = useState('')
+  const [error, setError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    setError('')
+    setSubmitting(true)
+    try {
+      await createReview({ storeId, rating: Number(rating), content })
+      onSubmitted()
+    } catch (err) {
+      setError(getErrorMessage(err, '리뷰 등록에 실패했습니다.'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <form className="form form-inline" onSubmit={handleSubmit}>
+      <label className="form-group">
+        <span>평점</span>
+        <select value={rating} onChange={(e) => setRating(e.target.value)}>
+          {[5, 4, 3, 2, 1].map((value) => (
+            <option key={value} value={value}>
+              {value}점
+            </option>
+          ))}
+        </select>
+      </label>
+      <label className="form-group">
+        <span>리뷰 내용</span>
+        <input value={content} onChange={(e) => setContent(e.target.value)} />
+      </label>
+      {error && <p className="error-text">{error}</p>}
+      <button type="submit" className="btn btn-ghost" disabled={submitting}>
+        {submitting ? '등록 중...' : '리뷰 작성'}
+      </button>
+    </form>
+  )
+}
+
+function ReviewDisplay({ review }: { review: NonNullable<StoreRecord['review']> }) {
+  return (
+    <div className="review-item">
+      <div className="review-item-header">
+        <span>{'★'.repeat(review.rating)}</span>
+      </div>
+      {review.content && <p>{review.content}</p>}
+    </div>
+  )
+}
 
 export function MyStoresPage() {
-  const [stores, setStores] = useState<StoreSummary[]>([])
+  const [stores, setStores] = useState<StoreRecord[]>([])
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [error, setError] = useState('')
+  const [actionError, setActionError] = useState('')
 
   const load = () => {
     setStatus('loading')
@@ -34,37 +92,80 @@ export function MyStoresPage() {
     }
   }
 
+  const handleComplete = async (storeId: number) => {
+    setActionError('')
+    try {
+      await completeStore(storeId)
+      load()
+    } catch (err) {
+      setActionError(getErrorMessage(err, '완료 처리에 실패했습니다.'))
+    }
+  }
+
+  const handleCancel = async (storeId: number) => {
+    setActionError('')
+    try {
+      await cancelStore(storeId)
+      load()
+    } catch (err) {
+      setActionError(getErrorMessage(err, '취소에 실패했습니다.'))
+    }
+  }
+
   return (
     <section>
       <div className="page-header">
         <h1>내 짐 보관</h1>
         <Link to="/my/stores/new" className="btn btn-primary">
-          내 짐 보관
+          내 짐 보관하기
         </Link>
       </div>
 
       {status === 'loading' && <p>불러오는 중...</p>}
       {status === 'error' && <p className="error-text">{error}</p>}
+      {actionError && <p className="error-text">{actionError}</p>}
       {status === 'ready' && stores.length === 0 && <p>등록한 짐 보관 정보가 없습니다.</p>}
 
       <ul className="list">
         {stores.map((store) => (
-          <li key={store.id} className="list-item">
-            <div>
-              <strong>{store.name}</strong>
-              <p className="store-card-address">{store.address}</p>
+          <li key={store.id} className="list-item list-item-column">
+            <div className="list-item-row">
+              <div className="store-record-info">
+                {store.imageUrls[0] && (
+                  <img className="store-record-thumb" src={store.imageUrls[0]} alt={store.name} />
+                )}
+                <div>
+                  <strong>{store.name}</strong>
+                  <p className="store-card-address">{store.address}</p>
+                  <p>
+                    {store.startTime.replace('T', ' ')} ~ {store.endTime.replace('T', ' ')}
+                  </p>
+                  <p>짐 {store.luggageCount}개</p>
+                  {store.description && <p>{store.description}</p>}
+                </div>
+              </div>
+              <div className="list-item-actions">
+                <StatusBadge status={store.status} />
+                {store.status === 'PENDING' && (
+                  <>
+                    <Link to={`/my/stores/${store.id}/edit`} className="btn btn-ghost">
+                      수정
+                    </Link>
+                    <button type="button" className="btn btn-primary" onClick={() => handleComplete(store.id)}>
+                      이용 완료
+                    </button>
+                    <button type="button" className="btn btn-danger" onClick={() => handleCancel(store.id)}>
+                      취소
+                    </button>
+                  </>
+                )}
+                <button type="button" className="btn btn-danger" onClick={() => handleDelete(store.id)}>
+                  삭제
+                </button>
+              </div>
             </div>
-            <div className="list-item-actions">
-              <Link to={`/stores/${store.id}`} className="btn btn-ghost">
-                보기
-              </Link>
-              <Link to={`/my/stores/${store.id}/edit`} className="btn btn-ghost">
-                수정
-              </Link>
-              <button type="button" className="btn btn-danger" onClick={() => handleDelete(store.id)}>
-                삭제
-              </button>
-            </div>
+            {store.status === 'COMPLETED' &&
+              (store.review ? <ReviewDisplay review={store.review} /> : <ReviewForm storeId={store.id} onSubmitted={load} />)}
           </li>
         ))}
       </ul>

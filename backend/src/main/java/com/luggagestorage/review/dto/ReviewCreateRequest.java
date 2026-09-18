@@ -6,8 +6,8 @@ import jakarta.validation.constraints.NotNull;
 
 public record ReviewCreateRequest(
 
-    @NotNull(message = "예약 ID는 필수입니다.")
-    Long reservationId,
+    @NotNull(message = "짐 보관 ID는 필수입니다.")
+    Long storeId,
 
     @NotNull(message = "평점은 필수입니다.")
     @Min(value = 1, message = "평점은 1점 이상이어야 합니다.")

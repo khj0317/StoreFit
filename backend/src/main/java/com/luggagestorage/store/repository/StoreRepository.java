@@ -8,7 +8,5 @@ import java.util.List;
 
 public interface StoreRepository extends JpaRepository<Store, Long> {
 
-    List<Store> findAllByOrderByCreatedAtDesc();
-
-    List<Store> findByHostOrderByCreatedAtDesc(Member host);
+    List<Store> findByMemberOrderByCreatedAtDesc(Member member);
 }

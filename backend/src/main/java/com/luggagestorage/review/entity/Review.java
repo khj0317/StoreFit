@@ -1,8 +1,6 @@
 package com.luggagestorage.review.entity;
 
 import com.luggagestorage.common.entity.BaseTimeEntity;
-import com.luggagestorage.member.entity.Member;
-import com.luggagestorage.reservation.entity.Reservation;
 import com.luggagestorage.store.entity.Store;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -11,7 +9,6 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.AccessLevel;
@@ -29,15 +26,7 @@ public class Review extends BaseTimeEntity {
     private Long id;
 
     @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "reservation_id", nullable = false, unique = true)
-    private Reservation reservation;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    private Member member;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "store_id", nullable = false)
+    @JoinColumn(name = "store_id", nullable = false, unique = true)
     private Store store;
 
     @Column(nullable = false)
@@ -45,9 +34,7 @@ public class Review extends BaseTimeEntity {
 
     private String content;
 
-    public Review(Reservation reservation, Member member, Store store, Integer rating, String content) {
-        this.reservation = reservation;
-        this.member = member;
+    public Review(Store store, Integer rating, String content) {
         this.store = store;
         this.rating = rating;
         this.content = content;

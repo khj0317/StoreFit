@@ -4,6 +4,8 @@ import com.luggagestorage.common.entity.BaseTimeEntity;
 import com.luggagestorage.member.entity.Member;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -14,6 +16,8 @@ import jakarta.persistence.Table;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "stores")
@@ -26,8 +30,8 @@ public class Store extends BaseTimeEntity {
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "host_id", nullable = false)
-    private Member host;
+    @JoinColumn(name = "member_id", nullable = false)
+    private Member member;
 
     @Column(nullable = false)
     private String name;
@@ -37,20 +41,50 @@ public class Store extends BaseTimeEntity {
     @Column(nullable = false)
     private String address;
 
-    public Store(Member host, String name, String description, String address) {
-        this.host = host;
+    @Column(nullable = false)
+    private Integer luggageCount;
+
+    @Column(nullable = false)
+    private LocalDateTime startTime;
+
+    @Column(nullable = false)
+    private LocalDateTime endTime;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private StoreStatus status;
+
+    public Store(Member member, String name, String description, String address,
+                 Integer luggageCount, LocalDateTime startTime, LocalDateTime endTime) {
+        this.member = member;
         this.name = name;
         this.description = description;
         this.address = address;
+        this.luggageCount = luggageCount;
+        this.startTime = startTime;
+        this.endTime = endTime;
+        this.status = StoreStatus.PENDING;
     }
 
-    public void update(String name, String description, String address) {
+    public void update(String name, String description, String address,
+                        Integer luggageCount, LocalDateTime startTime, LocalDateTime endTime) {
         this.name = name;
         this.description = description;
         this.address = address;
+        this.luggageCount = luggageCount;
+        this.startTime = startTime;
+        this.endTime = endTime;
+    }
+
+    public void complete() {
+        this.status = StoreStatus.COMPLETED;
+    }
+
+    public void cancel() {
+        this.status = StoreStatus.CANCELLED;
     }
 
     public boolean isOwnedBy(Long memberId) {
-        return this.host.getId().equals(memberId);
+        return this.member.getId().equals(memberId);
     }
 }

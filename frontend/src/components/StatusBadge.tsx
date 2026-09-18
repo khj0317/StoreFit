@@ -1,11 +1,11 @@
-import type { ReservationStatus } from '../types'
+import type { StoreStatus } from '../types'
 
-const LABELS: Record<ReservationStatus, string> = {
+const LABELS: Record<StoreStatus, string> = {
   PENDING: '이용중',
   COMPLETED: '완료됨',
   CANCELLED: '취소됨',
 }
 
-export function StatusBadge({ status }: { status: ReservationStatus }) {
+export function StatusBadge({ status }: { status: StoreStatus }) {
   return <span className={`badge badge-${status.toLowerCase()}`}>{LABELS[status]}</span>
 }

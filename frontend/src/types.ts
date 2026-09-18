@@ -23,21 +23,28 @@ export interface LoginResponse {
   name: string
 }
 
-export interface StoreSummary {
+export type StoreStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED'
+
+export interface ReviewSummary {
   id: number
-  name: string
-  address: string
-  thumbnailUrl: string | null
+  rating: number
+  content: string | null
+  createdAt: string
 }
 
-export interface StoreDetail {
+export interface StoreRecord {
   id: number
-  hostId: number
-  hostName: string
+  memberId: number
+  memberName: string
   name: string
   description: string | null
   address: string
   imageUrls: string[]
+  luggageCount: number
+  startTime: string
+  endTime: string
+  status: StoreStatus
+  review: ReviewSummary | null
   createdAt: string
   updatedAt: string
 }
@@ -47,6 +54,9 @@ export interface StoreMutationRequest {
   description: string | null
   address: string
   imageUrls: string[]
+  luggageCount: number
+  startTime: string
+  endTime: string
 }
 
 export interface StoreFormValues {
@@ -55,43 +65,13 @@ export interface StoreFormValues {
   address: string
   addressDetail: string
   imageUrls: string[]
-}
-
-export type ReservationStatus = 'PENDING' | 'COMPLETED' | 'CANCELLED'
-
-export interface Reservation {
-  id: number
-  storeId: number
-  storeName: string
-  memberId: number
-  memberName: string
-  luggageCount: number
+  luggageCount: string
   startTime: string
   endTime: string
-  status: ReservationStatus
-  createdAt: string
-}
-
-export interface ReservationCreateRequest {
-  storeId: number
-  luggageCount: number
-  startTime: string
-  endTime: string
-}
-
-export interface Review {
-  id: number
-  reservationId: number
-  storeId: number
-  memberId: number
-  memberName: string
-  rating: number
-  content: string | null
-  createdAt: string
 }
 
 export interface ReviewCreateRequest {
-  reservationId: number
+  storeId: number
   rating: number
   content: string
 }
