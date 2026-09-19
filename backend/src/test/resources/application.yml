@@ -1,0 +1,23 @@
+spring:
+  application:
+    name: luggage-storage
+  datasource:
+    url: jdbc:h2:mem:test;MODE=MySQL;DB_CLOSE_DELAY=-1
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: true
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+
+jwt:
+  secret: test-only-secret-key-not-for-production-use-1234567890
+  access-token-expiration-ms: 3600000
+
+toss:
+  secret-key: test_sk_dummy

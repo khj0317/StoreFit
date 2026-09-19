@@ -1,0 +1,32 @@
+# Activate with SPRING_PROFILES_ACTIVE=prod. All values below must come from real
+# environment variables -- unlike the dev defaults in application.yml, there are no
+# fallbacks here, so a missing one fails startup loudly instead of silently deploying
+# with a dev secret or pointing at the wrong database.
+spring:
+  datasource:
+    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?serverTimezone=Asia/Seoul
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+  h2:
+    console:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  flyway:
+    enabled: true
+    baseline-on-migrate: true
+    baseline-version: 0
+    # Explicitly overrides application.yml's dev-only db/migration-h2dev addition -- prod's
+    # MySQL always starts from V1's already-correct schema and must never see those
+    # H2-only-syntax migrations.
+    locations: classpath:db/migration
+
+jwt:
+  secret: ${JWT_SECRET}
+  access-token-expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+
+toss:
+  secret-key: ${TOSS_SECRET_KEY}
