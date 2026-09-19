@@ -1,66 +1,12 @@
-import { type FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { beginStorage, completeStore, deleteStore, getMyStores, pickUpStore } from '../api/stores'
-import { createReview } from '../api/reviews'
+import { ExpiryBanner } from '../components/ExpiryBanner'
 import { StatusBadge } from '../components/StatusBadge'
 import { STORE_CATEGORY_LABELS } from '../constants/storeCategories'
 import { getErrorMessage } from '../lib/api'
+import { daysUntil, formatDday } from '../lib/date'
 import type { StoreRecord } from '../types'
-
-function ReviewForm({ storeId, onSubmitted }: { storeId: number; onSubmitted: () => void }) {
-  const [rating, setRating] = useState('5')
-  const [content, setContent] = useState('')
-  const [error, setError] = useState('')
-  const [submitting, setSubmitting] = useState(false)
-
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault()
-    setError('')
-    setSubmitting(true)
-    try {
-      await createReview({ storeId, rating: Number(rating), content })
-      onSubmitted()
-    } catch (err) {
-      setError(getErrorMessage(err, '리뷰 등록에 실패했습니다.'))
-    } finally {
-      setSubmitting(false)
-    }
-  }
-
-  return (
-    <form className="form form-inline" onSubmit={handleSubmit}>
-      <label className="form-group">
-        <span>평점</span>
-        <select value={rating} onChange={(e) => setRating(e.target.value)}>
-          {[5, 4, 3, 2, 1].map((value) => (
-            <option key={value} value={value}>
-              {value}점
-            </option>
-          ))}
-        </select>
-      </label>
-      <label className="form-group">
-        <span>리뷰 내용</span>
-        <input value={content} onChange={(e) => setContent(e.target.value)} />
-      </label>
-      {error && <p className="error-text">{error}</p>}
-      <button type="submit" className="btn btn-ghost" disabled={submitting}>
-        {submitting ? '등록 중...' : '리뷰 작성'}
-      </button>
-    </form>
-  )
-}
-
-function ReviewDisplay({ review }: { review: NonNullable<StoreRecord['review']> }) {
-  return (
-    <div className="review-item">
-      <div className="review-item-header">
-        <span>{'★'.repeat(review.rating)}</span>
-      </div>
-      {review.content && <p>{review.content}</p>}
-    </div>
-  )
-}
 
 export function MyStoresPage() {
   const [stores, setStores] = useState<StoreRecord[]>([])
@@ -82,6 +28,8 @@ export function MyStoresPage() {
   }
 
   useEffect(load, [])
+
+  const activeStores = stores.filter((store) => store.status !== 'COMPLETED')
 
   const handleCancel = async (storeId: number) => {
     if (!window.confirm('이 짐 보관을 취소하시겠습니까? 취소하면 삭제되어 되돌릴 수 없습니다.')) return
@@ -115,7 +63,7 @@ export function MyStoresPage() {
   }
 
   const handleComplete = async (storeId: number) => {
-    if (!window.confirm('이용을 완료 처리하시겠습니까? 완료 후에는 되돌릴 수 없습니다.')) return
+    if (!window.confirm('이용을 완료 처리하시겠습니까? 완료 처리된 항목은 짐 보관 내역으로 이동합니다.')) return
     setActionError('')
     try {
       await completeStore(storeId)
@@ -129,15 +77,20 @@ export function MyStoresPage() {
     <section>
       <div className="page-header">
         <h1>짐 보관 현황</h1>
+        <Link to="/my/stores/history">짐 보관 내역</Link>
       </div>
+
+      <ExpiryBanner stores={activeStores} />
 
       {status === 'loading' && <p>불러오는 중...</p>}
       {status === 'error' && <p className="error-text">{error}</p>}
       {actionError && <p className="error-text">{actionError}</p>}
-      {status === 'ready' && stores.length === 0 && <p>등록한 짐 보관 정보가 없습니다.</p>}
+      {status === 'ready' && activeStores.length === 0 && (
+        <p className="empty-state">등록한 짐 보관 정보가 없습니다.</p>
+      )}
 
       <ul className="list">
-        {stores.map((store) => (
+        {activeStores.map((store) => (
           <li key={store.id} className="list-item list-item-column">
             <div className="list-item-row">
               <div className="store-record-info">
@@ -150,6 +103,12 @@ export function MyStoresPage() {
                   <p className="store-card-address">{store.address}</p>
                   <p>
                     {store.startDate} ~ {store.endDate}
+                    {store.status === 'IN_USE' && (
+                      <span className={`badge ${daysUntil(store.endDate) < 0 ? 'badge-danger' : 'badge-warning'}`}>
+                        {' '}
+                        {formatDday(daysUntil(store.endDate))}
+                      </span>
+                    )}
                   </p>
                   <p>
                     짐 {store.luggageCount}개 · {store.totalPrice.toLocaleString()}원
@@ -190,8 +149,6 @@ export function MyStoresPage() {
                 </button>
               </div>
             </div>
-            {store.status === 'COMPLETED' &&
-              (store.review ? <ReviewDisplay review={store.review} /> : <ReviewForm storeId={store.id} onSubmitted={load} />)}
           </li>
         ))}
       </ul>

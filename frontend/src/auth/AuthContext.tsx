@@ -9,6 +9,7 @@ interface AuthContextValue {
   login: (username: string, password: string) => Promise<void>
   signup: (request: SignupRequest) => Promise<void>
   logout: () => void
+  updateDisplayName: (name: string) => void
 }
 
 const AuthContext = createContext<AuthContextValue | null>(null)
@@ -37,8 +38,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     setUser(null)
   }
 
+  const updateDisplayName = (name: string) => {
+    setUser((current) => {
+      if (!current) return current
+      const updated = { ...current, name }
+      saveStoredAuth(updated)
+      return updated
+    })
+  }
+
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: user !== null, login, signup, logout }),
+    () => ({ user, isAuthenticated: user !== null, login, signup, logout, updateDisplayName }),
     [user],
   )
 

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.OffsetDateTime;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -71,6 +72,13 @@ public class PaymentService {
         payment.approve(result.paymentKey(), result.method(), OffsetDateTime.parse(result.approvedAt()).toLocalDateTime());
 
         return PaymentResponse.from(payment);
+    }
+
+    public List<PaymentResponse> getMyPayments() {
+        Member member = getCurrentMember();
+        return paymentRepository.findByStore_MemberOrderByCreatedAtDesc(member).stream()
+            .map(PaymentResponse::from)
+            .toList();
     }
 
     private String generateOrderId(Store store) {

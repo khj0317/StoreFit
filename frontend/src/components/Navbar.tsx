@@ -22,13 +22,16 @@ export function Navbar() {
           <>
             <Link to="/my/stores/new">짐 보관하기</Link>
             <Link to="/my/stores">짐 보관 현황</Link>
+            <Link to="/my/payments">결제 내역</Link>
           </>
         )}
       </nav>
       <div className="navbar-actions">
         {isAuthenticated ? (
           <>
-            <span className="navbar-user">{user?.name}님</span>
+            <Link to="/my/profile" className="navbar-user">
+              {user?.name}님
+            </Link>
             <button type="button" className="btn btn-ghost" onClick={handleLogout}>
               로그아웃
             </button>

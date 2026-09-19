@@ -8,8 +8,6 @@ import com.luggagestorage.member.repository.MemberRepository;
 import com.luggagestorage.payment.entity.Payment;
 import com.luggagestorage.payment.entity.PaymentStatus;
 import com.luggagestorage.payment.repository.PaymentRepository;
-import com.luggagestorage.review.dto.ReviewSummary;
-import com.luggagestorage.review.repository.ReviewRepository;
 import com.luggagestorage.store.dto.StoreCreateRequest;
 import com.luggagestorage.store.dto.StoreResponse;
 import com.luggagestorage.store.dto.StoreUpdateRequest;
@@ -35,7 +33,6 @@ public class StoreService {
 
     private final StoreRepository storeRepository;
     private final StoreImageRepository storeImageRepository;
-    private final ReviewRepository reviewRepository;
     private final PaymentRepository paymentRepository;
     private final MemberRepository memberRepository;
 
@@ -108,7 +105,6 @@ public class StoreService {
         Store store = getStoreOrThrow(storeId);
         requireOwner(store);
 
-        reviewRepository.findByStore(store).ifPresent(reviewRepository::delete);
         paymentRepository.findByStore(store).ifPresent(paymentRepository::delete);
         storeImageRepository.deleteByStore(store);
         storeRepository.delete(store);
@@ -185,13 +181,10 @@ public class StoreService {
     }
 
     private StoreResponse toResponse(Store store, List<String> imageUrls) {
-        ReviewSummary review = reviewRepository.findByStore(store)
-            .map(ReviewSummary::from)
-            .orElse(null);
         PaymentStatus paymentStatus = paymentRepository.findByStore(store)
             .map(Payment::getStatus)
             .orElse(null);
-        return StoreResponse.of(store, imageUrls, paymentStatus, review);
+        return StoreResponse.of(store, imageUrls, paymentStatus);
     }
 
     private void requireOwner(Store store) {

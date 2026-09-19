@@ -5,14 +5,17 @@ import { ProtectedRoute } from './components/ProtectedRoute'
 import { FindUsernamePage } from './pages/FindUsernamePage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
+import { MyPage } from './pages/MyPage'
 import { MyStoresPage } from './pages/MyStoresPage'
 import { NotFoundPage } from './pages/NotFoundPage'
 import { PaymentFailPage } from './pages/PaymentFailPage'
+import { PaymentHistoryPage } from './pages/PaymentHistoryPage'
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage'
 import { ResetPasswordPage } from './pages/ResetPasswordPage'
 import { SignupPage } from './pages/SignupPage'
 import { StoreCategoryPage } from './pages/StoreCategoryPage'
 import { StoreFormPage } from './pages/StoreFormPage'
+import { StoreHistoryPage } from './pages/StoreHistoryPage'
 import { StorePaymentPage } from './pages/StorePaymentPage'
 
 function App() {
@@ -27,10 +30,34 @@ function App() {
           <Route path="/find-username" element={<FindUsernamePage />} />
           <Route path="/reset-password" element={<ResetPasswordPage />} />
           <Route
+            path="/my/profile"
+            element={
+              <ProtectedRoute>
+                <MyPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/payments"
+            element={
+              <ProtectedRoute>
+                <PaymentHistoryPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
             path="/my/stores"
             element={
               <ProtectedRoute>
                 <MyStoresPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/my/stores/history"
+            element={
+              <ProtectedRoute>
+                <StoreHistoryPage />
               </ProtectedRoute>
             }
           />

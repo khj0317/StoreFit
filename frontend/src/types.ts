@@ -47,13 +47,6 @@ export type StoreCategory = 'LIGHT' | 'MEDIUM' | 'CLOTHES' | 'OTHER'
 
 export type PaymentStatus = 'READY' | 'DONE' | 'FAILED' | 'CANCELED'
 
-export interface ReviewSummary {
-  id: number
-  rating: number
-  content: string | null
-  createdAt: string
-}
-
 export interface StoreRecord {
   id: number
   memberId: number
@@ -69,7 +62,6 @@ export interface StoreRecord {
   status: StoreStatus
   totalPrice: number
   paymentStatus: PaymentStatus | null
-  review: ReviewSummary | null
   createdAt: string
   updatedAt: string
 }
@@ -97,12 +89,6 @@ export interface StoreFormValues {
   endDate: string
 }
 
-export interface ReviewCreateRequest {
-  storeId: number
-  rating: number
-  content: string
-}
-
 export interface PaymentReadyResponse {
   orderId: string
   amount: number
@@ -118,9 +104,34 @@ export interface PaymentConfirmRequest {
 export interface PaymentResponse {
   id: number
   storeId: number
+  storeName: string
   orderId: string
   amount: number
   status: PaymentStatus
   method: string | null
   approvedAt: string | null
+  createdAt: string
+}
+
+export interface MemberProfile {
+  id: number
+  username: string
+  name: string
+  email: string | null
+  phoneNumber: string | null
+}
+
+export interface UpdateProfileRequest {
+  name: string
+  email?: string
+  phoneNumber?: string
+}
+
+export interface ChangePasswordRequest {
+  currentPassword: string
+  newPassword: string
+}
+
+export interface DeleteAccountRequest {
+  password: string
 }
