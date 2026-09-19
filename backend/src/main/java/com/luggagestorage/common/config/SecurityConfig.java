@@ -28,6 +28,7 @@ public class SecurityConfig {
     private static final String[] PERMIT_ALL_PATHS = {
         "/api/auth/**",
         "/api/health",
+        "/error",
         "/uploads/**",
         "/h2-console/**",
         "/swagger-ui/**",

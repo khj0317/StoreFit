@@ -14,12 +14,16 @@
   --navy: #12143b;
   --danger: #dc2626;
   --danger-bg: rgba(220, 38, 38, 0.08);
+  --warning: #b45309;
+  --warning-bg: rgba(217, 119, 6, 0.12);
   --success: #16a34a;
 
   --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
+  --display: 'Plus Jakarta Sans', var(--sans);
 
   color-scheme: light dark;
   font: 16px/1.5 var(--sans);
+  font-variant-numeric: tabular-nums;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -45,6 +49,8 @@
     --navy: #0b0c1f;
     --danger: #f87171;
     --danger-bg: rgba(248, 113, 113, 0.12);
+    --warning: #fbbf24;
+    --warning-bg: rgba(251, 191, 36, 0.14);
     --success: #4ade80;
   }
 }
@@ -61,7 +67,9 @@ h1,
 h2,
 h3 {
   color: var(--text-h);
-  font-weight: 600;
+  font-family: var(--display);
+  font-weight: 700;
+  letter-spacing: -0.01em;
   margin: 0 0 8px;
 }
 
