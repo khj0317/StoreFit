@@ -2,7 +2,10 @@ package com.luggagestorage.auth.controller;
 
 import com.luggagestorage.auth.dto.LoginRequest;
 import com.luggagestorage.auth.dto.LoginResponse;
+import com.luggagestorage.auth.dto.RefreshRequest;
 import com.luggagestorage.auth.security.JwtTokenProvider;
+import com.luggagestorage.auth.service.LoginAttemptService;
+import com.luggagestorage.auth.service.RefreshTokenService;
 import com.luggagestorage.common.exception.BusinessException;
 import com.luggagestorage.common.exception.ErrorCode;
 import com.luggagestorage.member.dto.FindUsernameRequest;
@@ -34,6 +37,8 @@ public class AuthController {
     private final MemberRepository memberRepository;
     private final AuthenticationManager authenticationManager;
     private final JwtTokenProvider jwtTokenProvider;
+    private final RefreshTokenService refreshTokenService;
+    private final LoginAttemptService loginAttemptService;
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest request) {
@@ -42,19 +47,34 @@ public class AuthController {
 
     @PostMapping("/login")
     public ResponseEntity<LoginResponse> login(@Valid @RequestBody LoginRequest request) {
+        loginAttemptService.checkNotLocked(request.username());
         try {
             authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(request.username(), request.password())
             );
         } catch (AuthenticationException e) {
+            loginAttemptService.recordFailure(request.username());
             throw new BusinessException(ErrorCode.INVALID_CREDENTIALS);
         }
+        loginAttemptService.recordSuccess(request.username());
 
         Member member = memberRepository.findByUsername(request.username())
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
-        String accessToken = jwtTokenProvider.createAccessToken(member.getUsername(), member.getRole().name());
-        return ResponseEntity.ok(LoginResponse.of(accessToken, member.getUsername(), member.getName()));
+        return ResponseEntity.ok(tokensFor(member, refreshTokenService.issue(member)));
+    }
+
+    /** 액세스 토큰이 만료되면 리프레시 토큰으로 새 토큰 한 쌍을 받는다 */
+    @PostMapping("/refresh")
+    public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshRequest request) {
+        RefreshTokenService.Rotated rotated = refreshTokenService.rotate(request.refreshToken());
+        return ResponseEntity.ok(tokensFor(rotated.member(), rotated.refreshToken()));
+    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<Void> logout(@RequestBody(required = false) RefreshRequest request) {
+        refreshTokenService.revoke(request == null ? null : request.refreshToken());
+        return ResponseEntity.noContent().build();
     }
 
     @PostMapping("/find-username")
@@ -66,5 +86,10 @@ public class AuthController {
     public ResponseEntity<Void> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         memberService.resetPassword(request);
         return ResponseEntity.ok().build();
+    }
+
+    private LoginResponse tokensFor(Member member, String refreshToken) {
+        String accessToken = jwtTokenProvider.createAccessToken(member.getUsername(), member.getRole().name());
+        return LoginResponse.of(accessToken, refreshToken, member.getUsername(), member.getName(), member.getRole());
     }
 }

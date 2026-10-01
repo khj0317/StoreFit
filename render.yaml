@@ -1,0 +1,84 @@
+# Render Blueprint: Render 대시보드 → New → Blueprint → 이 저장소를 고르면 아래 설정으로 API 서버를 만든다.
+# sync: false인 값(비밀번호·키)은 처음 만들 때 화면에서 직접 입력한다 (.env.example 참고)
+services:
+  - type: web
+    name: storefit-api
+    runtime: docker
+    plan: free
+    region: singapore
+    dockerfilePath: ./backend/Dockerfile
+    dockerContext: ./backend
+    healthCheckPath: /api/health
+    autoDeploy: true
+    # 백엔드가 바뀐 커밋만 다시 배포한다 (프론트만 바뀌면 Vercel만 배포)
+    buildFilter:
+      paths:
+        - backend/**
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: prod
+      # ---- Supabase Postgres (Connect → Session pooler, 포트 5432) ----
+      - key: DB_URL
+        sync: false
+      - key: DB_USERNAME
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: DB_POOL_SIZE
+        value: "5"
+      # ---- 보안 ----
+      - key: JWT_SECRET
+        sync: false
+      # Vercel 주소 (여러 개면 쉼표, * 패턴 가능). 화면은 vercel.json 프록시로 같은 주소에서 부르지만
+      # 미리보기 배포에서 직접 부를 때를 대비해 넣어 둔다
+      - key: CORS_ALLOWED_ORIGINS
+        sync: false
+      # ---- 결제 ----
+      - key: TOSS_SECRET_KEY
+        sync: false
+      # ---- 사진: Supabase Storage (S3 호환) ----
+      - key: STORAGE_TYPE
+        value: s3
+      - key: S3_ENDPOINT
+        sync: false
+      - key: S3_PUBLIC_URL
+        sync: false
+      - key: S3_ACCESS_KEY
+        sync: false
+      - key: S3_SECRET_KEY
+        sync: false
+      - key: S3_REGION
+        value: ap-northeast-2
+      - key: S3_BUCKET
+        value: storefit
+      - key: S3_PATH_STYLE
+        value: "true"
+      # ---- 문자·카카오 알림톡: 솔라피 ----
+      - key: NOTIFICATION_PROVIDER
+        value: solapi
+      - key: SOLAPI_API_KEY
+        sync: false
+      - key: SOLAPI_API_SECRET
+        sync: false
+      - key: SOLAPI_SENDER
+        sync: false
+      # 알림톡을 쓰려면 채널 ID와 템플릿 ID(KAKAO_TEMPLATE_*)를 넣는다. 비우면 모두 문자로 보낸다
+      - key: SOLAPI_KAKAO_PF_ID
+        sync: false
+      # ---- 관리자 계정 (처음 한 번 만들어진다) ----
+      - key: ADMIN_USERNAME
+        sync: false
+      - key: ADMIN_PASSWORD
+        sync: false
+      - key: DEMO_DATA_ENABLED
+        value: "false"
+      # ---- 무료 플랜(메모리 512MB)에 맞춘 JVM 설정 (FitMate에서 검증한 값) ----
+      - key: JAVA_TOOL_OPTIONS
+        value: >-
+          -XX:MaxRAMPercentage=40 -XX:MaxMetaspaceSize=150m -XX:ReservedCodeCacheSize=40m
+          -XX:MaxDirectMemorySize=32m -Xss512k -XX:+UseSerialGC -XX:TieredStopAtLevel=1
+          -XX:+ExitOnOutOfMemoryError -Dfile.encoding=UTF-8 -Duser.timezone=Asia/Seoul
+      - key: MALLOC_ARENA_MAX
+        value: "2"
+      - key: SERVER_TOMCAT_THREADS_MAX
+        value: "30"

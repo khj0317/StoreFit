@@ -1,5 +1,11 @@
 import { api } from '../lib/api'
-import type { ChangePasswordRequest, DeleteAccountRequest, MemberProfile, UpdateProfileRequest } from '../types'
+import type {
+  ChangePasswordRequest,
+  ChangePhoneRequest,
+  DeleteAccountRequest,
+  MemberProfile,
+  UpdateProfileRequest,
+} from '../types'
 
 export function getMyProfile() {
   return api.get<MemberProfile>('/members/me').then((res) => res.data)
@@ -7,6 +13,10 @@ export function getMyProfile() {
 
 export function updateProfile(request: UpdateProfileRequest) {
   return api.patch<MemberProfile>('/members/me', request).then((res) => res.data)
+}
+
+export function changePhone(request: ChangePhoneRequest) {
+  return api.patch<MemberProfile>('/members/me/phone', request).then((res) => res.data)
 }
 
 export function changePassword(request: ChangePasswordRequest) {

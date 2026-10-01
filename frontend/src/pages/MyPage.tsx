@@ -1,15 +1,15 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { changePassword, deleteAccount, getMyProfile, updateProfile } from '../api/members'
+import { changePassword, changePhone, deleteAccount, getMyProfile, updateProfile } from '../api/members'
 import { useAuth } from '../auth/AuthContext'
+import { Loading } from '../components/Feedback'
+import { PhoneVerifyField } from '../components/PhoneVerifyField'
 import { getErrorMessage } from '../lib/api'
 import type { MemberProfile } from '../types'
 
 function ProfileSection({ profile, onUpdated }: { profile: MemberProfile; onUpdated: (profile: MemberProfile) => void }) {
   const { updateDisplayName } = useAuth()
   const [name, setName] = useState(profile.name)
-  const [email, setEmail] = useState(profile.email ?? '')
-  const [phoneNumber, setPhoneNumber] = useState(profile.phoneNumber ?? '')
   const [error, setError] = useState('')
   const [success, setSuccess] = useState('')
   const [submitting, setSubmitting] = useState(false)
@@ -20,7 +20,7 @@ function ProfileSection({ profile, onUpdated }: { profile: MemberProfile; onUpda
     setSuccess('')
     setSubmitting(true)
     try {
-      const updated = await updateProfile({ name, email: email || undefined, phoneNumber: phoneNumber || undefined })
+      const updated = await updateProfile({ name })
       onUpdated(updated)
       updateDisplayName(updated.name)
       setSuccess('회원정보를 수정했습니다.')
@@ -36,27 +36,83 @@ function ProfileSection({ profile, onUpdated }: { profile: MemberProfile; onUpda
       <h2>회원정보</h2>
       <form className="form" onSubmit={handleSubmit}>
         <label className="form-group">
-          <span>아이디</span>
+          <span className="form-label">아이디</span>
           <input value={profile.username} disabled />
         </label>
         <label className="form-group">
-          <span>이름</span>
-          <input value={name} onChange={(e) => setName(e.target.value)} required />
-        </label>
-        <label className="form-group">
-          <span>이메일</span>
-          <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-        </label>
-        <label className="form-group">
-          <span>전화번호</span>
-          <input value={phoneNumber} onChange={(e) => setPhoneNumber(e.target.value)} />
+          <span className="form-label">이름</span>
+          <input value={name} onChange={(e) => setName(e.target.value)} maxLength={30} required />
         </label>
         {error && <p className="error-text">{error}</p>}
         {success && <p className="success-text">{success}</p>}
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
+        <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={submitting}>
           {submitting ? '저장 중...' : '저장'}
         </button>
       </form>
+    </section>
+  )
+}
+
+/** 예약·보관 알림 문자가 가는 번호. 새 번호로 인증해야 바뀐다 */
+function PhoneSection({ profile, onUpdated }: { profile: MemberProfile; onUpdated: (profile: MemberProfile) => void }) {
+  const [editing, setEditing] = useState(false)
+  const [phone, setPhone] = useState('')
+  const [verificationToken, setVerificationToken] = useState<string | null>(null)
+  const [error, setError] = useState('')
+  const [success, setSuccess] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  const handleSubmit = async (event: FormEvent) => {
+    event.preventDefault()
+    if (!verificationToken) return
+    setError('')
+    setSubmitting(true)
+    try {
+      const updated = await changePhone({ phoneNumber: phone, verificationToken })
+      onUpdated(updated)
+      setEditing(false)
+      setPhone('')
+      setVerificationToken(null)
+      setSuccess('휴대폰 번호를 바꿨어요. 이제 이 번호로 알림을 보내드려요.')
+    } catch (err) {
+      setError(getErrorMessage(err, '휴대폰 번호를 바꾸지 못했습니다.'))
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  return (
+    <section className="mypage-section">
+      <h2>휴대폰 번호</h2>
+      <p>예약 확정, 체크인, 만료 안내 같은 알림을 이 번호로 문자·카카오톡으로 보내드려요.</p>
+      {!editing ? (
+        <div className="phone-row">
+          <strong>{profile.phoneNumber ?? '등록된 번호가 없어요'}</strong>
+          <button type="button" className="btn btn-ghost btn-sm" onClick={() => setEditing(true)}>
+            번호 변경
+          </button>
+        </div>
+      ) : (
+        <form className="form" onSubmit={handleSubmit}>
+          <PhoneVerifyField
+            purpose="CHANGE_PHONE"
+            label="새 휴대폰 번호"
+            phone={phone}
+            onPhoneChange={setPhone}
+            onVerified={setVerificationToken}
+          />
+          {error && <p className="error-text">{error}</p>}
+          <div className="form-actions">
+            <button type="button" className="btn btn-ghost" onClick={() => setEditing(false)}>
+              취소
+            </button>
+            <button type="submit" className="btn btn-primary" disabled={submitting || !verificationToken}>
+              {submitting ? '변경 중...' : '이 번호로 변경'}
+            </button>
+          </div>
+        </form>
+      )}
+      {success && <p className="success-text">{success}</p>}
     </section>
   )
 }
@@ -98,7 +154,7 @@ function PasswordSection() {
       <h2>비밀번호 변경</h2>
       <form className="form" onSubmit={handleSubmit}>
         <label className="form-group">
-          <span>현재 비밀번호</span>
+          <span className="form-label">현재 비밀번호</span>
           <input
             type="password"
             value={currentPassword}
@@ -107,7 +163,7 @@ function PasswordSection() {
           />
         </label>
         <label className="form-group">
-          <span>새 비밀번호</span>
+          <span className="form-label">새 비밀번호</span>
           <input
             type="password"
             value={newPassword}
@@ -118,7 +174,7 @@ function PasswordSection() {
           />
         </label>
         <label className="form-group">
-          <span>새 비밀번호 확인</span>
+          <span className="form-label">새 비밀번호 확인</span>
           <input
             type="password"
             value={confirmPassword}
@@ -130,7 +186,7 @@ function PasswordSection() {
         </label>
         {error && <p className="error-text">{error}</p>}
         {success && <p className="success-text">{success}</p>}
-        <button type="submit" className="btn btn-primary" disabled={submitting}>
+        <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={submitting}>
           {submitting ? '변경 중...' : '비밀번호 변경'}
         </button>
       </form>
@@ -168,10 +224,10 @@ function DeleteAccountSection() {
   return (
     <section className="mypage-section danger-zone">
       <h2>회원 탈퇴</h2>
-      <p className="page-subtitle">탈퇴하면 등록한 모든 짐 보관 정보와 결제 내역이 함께 삭제됩니다.</p>
+      <p>탈퇴하면 등록한 모든 짐 보관 정보와 결제 내역이 함께 삭제되며 되돌릴 수 없어요. 결제했거나 맡겨둔 짐이 있으면 보관을 마친 뒤 탈퇴할 수 있어요.</p>
       <form className="form form-inline" onSubmit={handleSubmit}>
         <label className="form-group">
-          <span>비밀번호 확인</span>
+          <span className="form-label">비밀번호 확인</span>
           <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
         </label>
         {error && <p className="error-text">{error}</p>}
@@ -202,15 +258,19 @@ export function MyPage() {
 
   return (
     <section className="mypage">
-      <div className="page-header">
-        <h1>마이페이지</h1>
-      </div>
-
-      {status === 'loading' && <p>불러오는 중...</p>}
+      {status === 'loading' && <Loading />}
       {status === 'error' && <p className="error-text">{error}</p>}
       {status === 'ready' && profile && (
         <>
+          <div className="profile-hero">
+            <span className="avatar avatar-lg">{profile.name.slice(0, 1)}</span>
+            <div>
+              <strong>{profile.name}님</strong>
+              <span>@{profile.username}</span>
+            </div>
+          </div>
           <ProfileSection profile={profile} onUpdated={setProfile} />
+          <PhoneSection profile={profile} onUpdated={setProfile} />
           <PasswordSection />
           <DeleteAccountSection />
         </>

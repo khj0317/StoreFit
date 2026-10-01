@@ -1,6 +1,6 @@
 // Toss Payments' own published sandbox test client key (safe to share, no real merchant attached).
 // Replace with your real client key from https://developers.tosspayments.com before going live.
-const CLIENT_KEY = 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq'
+const CLIENT_KEY = import.meta.env.VITE_TOSS_CLIENT_KEY ?? 'test_ck_D5GePWvyJnrK0W0k6q8gLzN97Eoq'
 
 const SCRIPT_SRC = 'https://js.tosspayments.com/v1/payment'
 

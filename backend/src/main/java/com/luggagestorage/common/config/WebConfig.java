@@ -3,30 +3,29 @@ package com.luggagestorage.common.config;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
 
 @Configuration
 public class WebConfig implements WebMvcConfigurer {
 
-    // In production the frontend and backend sit behind the same nginx origin (nginx
-    // proxies /api to the backend container), so the browser never sends a cross-origin
-    // request there and this only matters for local dev against the Vite server.
-    @Value("${app.cors.allowed-origin:http://localhost:5173}")
-    private String allowedOrigin;
+    // 로컬은 Vite 개발 서버, 배포는 Vercel 주소. Vercel 미리보기 주소처럼 바뀌는 주소도
+    // 받을 수 있게 쉼표로 여러 개, * 패턴까지 허용한다.
+    @Value("${app.cors.allowed-origins}")
+    private String allowedOrigins;
 
     @Override
     public void addCorsMappings(CorsRegistry registry) {
-        registry.addMapping("/**")
-            .allowedOrigins(allowedOrigin)
+        String[] origins = Arrays.stream(allowedOrigins.split(","))
+            .map(String::trim)
+            .filter(origin -> !origin.isEmpty())
+            .toArray(String[]::new);
+
+        registry.addMapping("/api/**")
+            .allowedOriginPatterns(origins)
             .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
             .allowedHeaders("*")
             .allowCredentials(true);
-    }
-
-    @Override
-    public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        registry.addResourceHandler("/uploads/**")
-            .addResourceLocations("file:uploads/");
     }
 }

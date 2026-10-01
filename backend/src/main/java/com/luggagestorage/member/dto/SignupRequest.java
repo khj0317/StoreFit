@@ -1,10 +1,13 @@
 package com.luggagestorage.member.dto;
 
-import jakarta.validation.constraints.Email;
+import com.luggagestorage.member.entity.MemberRole;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Size;
 
+/**
+ * 휴대폰 인증을 마친 뒤에 가입한다. verificationToken은 /api/auth/phone/verify 에서 받은 일회용 토큰.
+ */
 public record SignupRequest(
 
     @NotBlank(message = "아이디는 필수입니다.")
@@ -16,11 +19,16 @@ public record SignupRequest(
     String password,
 
     @NotBlank(message = "이름은 필수입니다.")
+    @Size(max = 30, message = "이름은 30자 이하여야 합니다.")
     String name,
 
-    @Email(message = "이메일 형식이 올바르지 않습니다.")
-    String email,
+    @NotBlank(message = "휴대폰 번호는 필수입니다.")
+    String phoneNumber,
 
-    String phoneNumber
+    @NotBlank(message = "휴대폰 인증을 먼저 완료해주세요.")
+    String verificationToken,
+
+    /** USER(이용자) 또는 OWNER(지점 운영자). 비우면 USER */
+    MemberRole role
 ) {
 }

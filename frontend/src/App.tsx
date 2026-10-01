@@ -8,6 +8,10 @@ import { LoginPage } from './pages/LoginPage'
 import { MyPage } from './pages/MyPage'
 import { MyStoresPage } from './pages/MyStoresPage'
 import { NotFoundPage } from './pages/NotFoundPage'
+import { AdminPage } from './pages/admin/AdminPage'
+import { OwnerDashboardPage } from './pages/owner/OwnerDashboardPage'
+import { OwnerPlacesPage } from './pages/owner/OwnerPlacesPage'
+import { OwnerScanPage } from './pages/owner/OwnerScanPage'
 import { PaymentFailPage } from './pages/PaymentFailPage'
 import { PaymentHistoryPage } from './pages/PaymentHistoryPage'
 import { PaymentSuccessPage } from './pages/PaymentSuccessPage'
@@ -40,7 +44,7 @@ function App() {
           <Route
             path="/my/payments"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <PaymentHistoryPage />
               </ProtectedRoute>
             }
@@ -48,7 +52,7 @@ function App() {
           <Route
             path="/my/stores"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <MyStoresPage />
               </ProtectedRoute>
             }
@@ -56,7 +60,7 @@ function App() {
           <Route
             path="/my/stores/history"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <StoreHistoryPage />
               </ProtectedRoute>
             }
@@ -64,7 +68,7 @@ function App() {
           <Route
             path="/my/stores/new"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <StoreCategoryPage />
               </ProtectedRoute>
             }
@@ -72,7 +76,7 @@ function App() {
           <Route
             path="/my/stores/new/:category"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <StoreFormPage />
               </ProtectedRoute>
             }
@@ -80,7 +84,7 @@ function App() {
           <Route
             path="/my/stores/:storeId/edit"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <StoreFormPage />
               </ProtectedRoute>
             }
@@ -88,7 +92,7 @@ function App() {
           <Route
             path="/my/stores/:storeId/pay"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <StorePaymentPage />
               </ProtectedRoute>
             }
@@ -96,7 +100,7 @@ function App() {
           <Route
             path="/my/stores/:storeId/pay/success"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <PaymentSuccessPage />
               </ProtectedRoute>
             }
@@ -104,8 +108,40 @@ function App() {
           <Route
             path="/my/stores/:storeId/pay/fail"
             element={
-              <ProtectedRoute>
+              <ProtectedRoute role="USER">
                 <PaymentFailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/owner"
+            element={
+              <ProtectedRoute role="OWNER">
+                <OwnerDashboardPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/owner/places"
+            element={
+              <ProtectedRoute role="OWNER">
+                <OwnerPlacesPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/owner/scan"
+            element={
+              <ProtectedRoute role="OWNER">
+                <OwnerScanPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute role="ADMIN">
+                <AdminPage />
               </ProtectedRoute>
             }
           />

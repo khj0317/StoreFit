@@ -1,29 +1,45 @@
 :root {
-  --text: #52566b;
-  --text-h: #12143b;
-  --bg: #ffffff;
-  --bg-subtle: #f4f5fb;
-  --border: #e2e4ef;
-  --accent: #3b5bfd;
-  --accent-hover: #2d46d9;
-  --accent-bg: rgba(59, 91, 253, 0.08);
-  --secondary: #ffcc33;
-  --secondary-hover: #ffc107;
-  --secondary-text: #12143b;
-  --brand-accent-text: #b8860b;
-  --navy: #12143b;
-  --danger: #dc2626;
-  --danger-bg: rgba(220, 38, 38, 0.08);
-  --warning: #b45309;
-  --warning-bg: rgba(217, 119, 6, 0.12);
-  --success: #16a34a;
+  --bg: #f7f5fe;
+  --surface: #ffffff;
+  --surface-2: #f2effc;
+  --border: #e7e2f6;
+  --text: #6c6787;
+  --text-h: #2b2548;
+  --muted: #a29cbc;
 
-  --sans: system-ui, 'Segoe UI', Roboto, sans-serif;
-  --display: 'Plus Jakarta Sans', var(--sans);
+  /* 라벤더 계열 팔레트 — 톤 이름(peach/butter/mint)은 슬롯 이름으로만 유지 */
+  --accent: #7b68ee;
+  --accent-hover: #6a56e6;
+  --accent-soft: #eeeafe;
+  --accent-ink: #5a47cc;
+  --peach: #c38ae6;
+  --peach-soft: #f5ecfc;
+  --peach-ink: #8e4db8;
+  --butter: #8fa0f5;
+  --butter-hover: #7e90ef;
+  --butter-soft: #eceffe;
+  --butter-ink: #4a5bc0;
+  --mint: #a07cc5;
+  --mint-soft: #f2ecf9;
+  --mint-ink: #6f4a99;
+  --danger: #d9466a;
+  --danger-soft: #fcebf0;
+  --warning: #a0479a;
+  --warning-soft: #f8ebf6;
 
-  color-scheme: light dark;
-  font: 16px/1.5 var(--sans);
+  --shadow-sm: 0 1px 2px rgba(43, 37, 72, 0.04), 0 2px 8px rgba(43, 37, 72, 0.04);
+  --shadow-md: 0 14px 34px -14px rgba(76, 66, 160, 0.22);
+  --shadow-lg: 0 24px 60px -20px rgba(76, 66, 160, 0.32);
+  --radius-sm: 12px;
+  --radius: 20px;
+  --radius-lg: 28px;
+
+  --sans: 'Pretendard Variable', Pretendard, -apple-system, BlinkMacSystemFont, system-ui, 'Segoe UI', sans-serif;
+
+  color-scheme: light;
+  font: 16px/1.55 var(--sans);
   font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
   color: var(--text);
   background: var(--bg);
   font-synthesis: none;
@@ -32,44 +48,22 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --text: #b7b9c9;
-    --text-h: #f5f5fa;
-    --bg: #14152b;
-    --bg-subtle: #1c1e3a;
-    --border: #2e304f;
-    --accent: #7b93ff;
-    --accent-hover: #9cadff;
-    --accent-bg: rgba(123, 147, 255, 0.14);
-    --secondary: #ffd873;
-    --secondary-hover: #ffe19a;
-    --secondary-text: #12143b;
-    --brand-accent-text: #ffd873;
-    --navy: #0b0c1f;
-    --danger: #f87171;
-    --danger-bg: rgba(248, 113, 113, 0.12);
-    --warning: #fbbf24;
-    --warning-bg: rgba(251, 191, 36, 0.14);
-    --success: #4ade80;
-  }
-}
-
 * {
   box-sizing: border-box;
 }
 
 body {
   margin: 0;
+  background: var(--bg);
 }
 
 h1,
 h2,
 h3 {
   color: var(--text-h);
-  font-family: var(--display);
-  font-weight: 700;
-  letter-spacing: -0.01em;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.3;
   margin: 0 0 8px;
 }
 
@@ -82,7 +76,7 @@ h2 {
 }
 
 h3 {
-  font-size: 16px;
+  font-size: 17px;
 }
 
 p {
@@ -95,10 +89,25 @@ a {
 }
 
 a:hover {
-  text-decoration: underline;
+  color: var(--accent-hover);
 }
 
-ul {
+ul,
+ol {
   margin: 0;
   padding: 0;
+}
+
+::selection {
+  background: var(--accent-soft);
+  color: var(--accent-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation: none !important;
+    transition: none !important;
+  }
 }

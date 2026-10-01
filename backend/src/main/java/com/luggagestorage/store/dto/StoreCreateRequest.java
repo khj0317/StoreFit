@@ -1,7 +1,6 @@
 package com.luggagestorage.store.dto;
 
 import com.luggagestorage.store.entity.StoreCategory;
-import jakarta.validation.constraints.FutureOrPresent;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -9,15 +8,16 @@ import jakarta.validation.constraints.Positive;
 import java.time.LocalDate;
 import java.util.List;
 
+/** 시작 날짜가 오늘 이후인지는 서비스에서 한국 시간 기준으로 확인한다 (서버가 UTC여도 같게 동작) */
 public record StoreCreateRequest(
+
+    @NotNull(message = "보관소를 선택해주세요.")
+    Long placeId,
 
     @NotBlank(message = "제목은 필수입니다.")
     String name,
 
     String description,
-
-    @NotBlank(message = "주소는 필수입니다.")
-    String address,
 
     List<String> imageUrls,
 
@@ -29,7 +29,6 @@ public record StoreCreateRequest(
     Integer luggageCount,
 
     @NotNull(message = "시작 날짜는 필수입니다.")
-    @FutureOrPresent(message = "시작 날짜는 오늘 이후여야 합니다.")
     LocalDate startDate,
 
     @NotNull(message = "종료 날짜는 필수입니다.")

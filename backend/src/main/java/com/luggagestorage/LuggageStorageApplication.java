@@ -18,8 +18,9 @@ public class LuggageStorageApplication {
 	}
 
 	@Bean
-	public ApplicationRunner logDatabaseLocation(@Value("${spring.datasource.url}") String datasourceUrl) {
-		return args -> log.info("=== 데이터베이스 파일 위치: {} (재부팅해도 이 경로가 항상 같아야 데이터가 유지됩니다) ===", datasourceUrl);
+	public ApplicationRunner logDatabaseLocation(@Value("${spring.datasource.url:(자동 연결)}") String datasourceUrl) {
+		// 비밀번호 같은 쿼리 파라미터가 섞일 수 있어 ? 앞까지만 남긴다
+		return args -> log.info("=== 데이터베이스: {} ===", datasourceUrl.split("\\?")[0]);
 	}
 
 }

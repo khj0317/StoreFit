@@ -14,6 +14,8 @@ public record PaymentResponse(
     PaymentStatus status,
     String method,
     LocalDateTime approvedAt,
+    Integer canceledAmount,
+    LocalDateTime canceledAt,
     LocalDateTime createdAt
 ) {
 
@@ -27,6 +29,8 @@ public record PaymentResponse(
             payment.getStatus(),
             payment.getMethod(),
             payment.getApprovedAt(),
+            payment.getCanceledAmount(),
+            payment.getCanceledAt(),
             payment.getCreatedAt()
         );
     }

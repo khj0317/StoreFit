@@ -11,7 +11,10 @@ import com.luggagestorage.payment.dto.PaymentReadyResponse;
 import com.luggagestorage.payment.entity.Payment;
 import com.luggagestorage.payment.entity.PaymentStatus;
 import com.luggagestorage.payment.repository.PaymentRepository;
+import com.luggagestorage.place.entity.StoragePlace;
 import com.luggagestorage.store.entity.Store;
+import com.luggagestorage.store.service.CheckInCodeGenerator;
+import com.luggagestorage.store.service.ReservationNotifier;
 import com.luggagestorage.store.entity.StoreCategory;
 import com.luggagestorage.store.repository.StoreRepository;
 import org.junit.jupiter.api.AfterEach;
@@ -44,12 +47,17 @@ class PaymentServiceTest {
     private MemberRepository memberRepository;
     @Mock
     private TossPaymentsClient tossPaymentsClient;
+    @Mock
+    private CheckInCodeGenerator checkInCodeGenerator;
+    @Mock
+    private ReservationNotifier reservationNotifier;
 
     private PaymentService paymentService;
 
     @BeforeEach
     void setUp() {
-        paymentService = new PaymentService(paymentRepository, storeRepository, memberRepository, tossPaymentsClient);
+        paymentService = new PaymentService(paymentRepository, storeRepository, memberRepository, tossPaymentsClient,
+            checkInCodeGenerator, reservationNotifier, java.time.Clock.systemDefaultZone());
     }
 
     @AfterEach
@@ -70,7 +78,8 @@ class PaymentServiceTest {
     }
 
     private Store storeWithId(Long id, Member owner, int totalPrice) {
-        Store store = new Store(owner, "짐", null, "주소", StoreCategory.LIGHT, 1, LocalDate.now(), LocalDate.now(), totalPrice);
+        StoragePlace place = new StoragePlace(Member.createOwner("boss", "encoded", "사장님", null, null), "보관소", "주소", null, 10);
+        Store store = new Store(owner, place, "짐", null, StoreCategory.LIGHT, 1, LocalDate.now(), LocalDate.now(), totalPrice);
         ReflectionTestUtils.setField(store, "id", id);
         return store;
     }
@@ -83,7 +92,7 @@ class PaymentServiceTest {
         when(memberRepository.findByUsername("intruder")).thenReturn(Optional.of(intruder));
 
         Store store = storeWithId(10L, owner, 3000);
-        when(storeRepository.findById(10L)).thenReturn(Optional.of(store));
+        when(storeRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(store));
 
         assertThatThrownBy(() -> paymentService.ready(10L))
             .isInstanceOf(BusinessException.class)
@@ -98,7 +107,7 @@ class PaymentServiceTest {
         when(memberRepository.findByUsername("owner")).thenReturn(Optional.of(owner));
 
         Store store = storeWithId(10L, owner, 3000);
-        when(storeRepository.findById(10L)).thenReturn(Optional.of(store));
+        when(storeRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(store));
 
         Payment donePayment = new Payment(store, "order-1", 3000);
         donePayment.approve("key", "카드", java.time.LocalDateTime.now());
@@ -117,7 +126,7 @@ class PaymentServiceTest {
         when(memberRepository.findByUsername("owner")).thenReturn(Optional.of(owner));
 
         Store store = storeWithId(10L, owner, 3000);
-        when(storeRepository.findById(10L)).thenReturn(Optional.of(store));
+        when(storeRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(store));
         when(paymentRepository.findByStore(store)).thenReturn(Optional.empty());
         when(paymentRepository.save(any())).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -177,7 +186,9 @@ class PaymentServiceTest {
         TossConfirmResult tossResult = new TossConfirmResult(
             "toss-key", "order-1", 3000, "카드", "2026-09-18T00:00:00+09:00", "DONE"
         );
+        when(storeRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(store));
         when(tossPaymentsClient.confirm(eq("toss-key"), eq("order-1"), eq(3000))).thenReturn(tossResult);
+        when(checkInCodeGenerator.generate()).thenReturn("ABCD2345");
 
         PaymentConfirmRequest request = new PaymentConfirmRequest("toss-key", "order-1", 3000);
 
@@ -185,5 +196,45 @@ class PaymentServiceTest {
 
         assertThat(response.status()).isEqualTo(PaymentStatus.DONE);
         assertThat(response.method()).isEqualTo("카드");
+        // 결제가 끝나야 체크인 QR 코드가 생긴다
+        assertThat(store.getCheckInCode()).isEqualTo("ABCD2345");
+        org.mockito.Mockito.verify(reservationNotifier).paymentDone(store);
+    }
+
+    @Test
+    void confirm_afterReservationExpired_neverCallsPaymentApi() {
+        Member owner = memberWithId(1L, "owner");
+        loginAs("owner");
+        when(memberRepository.findByUsername("owner")).thenReturn(Optional.of(owner));
+
+        Store store = storeWithId(10L, owner, 3000);
+        store.expire();
+        Payment payment = new Payment(store, "order-1", 3000);
+        when(paymentRepository.findByOrderId("order-1")).thenReturn(Optional.of(payment));
+        when(storeRepository.findByIdForUpdate(10L)).thenReturn(Optional.of(store));
+
+        assertThatThrownBy(() -> paymentService.confirm(new PaymentConfirmRequest("toss-key", "order-1", 3000)))
+            .isInstanceOf(BusinessException.class)
+            .extracting("errorCode")
+            .isEqualTo(ErrorCode.PAYMENT_DEADLINE_PASSED);
+        org.mockito.Mockito.verifyNoInteractions(tossPaymentsClient);
+    }
+
+    @Test
+    void confirm_alreadyPaid_doesNotChargeTwice() {
+        Member owner = memberWithId(1L, "owner");
+        loginAs("owner");
+        when(memberRepository.findByUsername("owner")).thenReturn(Optional.of(owner));
+
+        Store store = storeWithId(10L, owner, 3000);
+        Payment payment = new Payment(store, "order-1", 3000);
+        payment.approve("toss-key", "카드", java.time.LocalDateTime.now());
+        when(paymentRepository.findByOrderId("order-1")).thenReturn(Optional.of(payment));
+
+        assertThatThrownBy(() -> paymentService.confirm(new PaymentConfirmRequest("toss-key", "order-1", 3000)))
+            .isInstanceOf(BusinessException.class)
+            .extracting("errorCode")
+            .isEqualTo(ErrorCode.ALREADY_PAID);
+        org.mockito.Mockito.verifyNoInteractions(tossPaymentsClient);
     }
 }

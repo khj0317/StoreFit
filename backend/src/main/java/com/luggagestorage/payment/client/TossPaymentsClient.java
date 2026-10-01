@@ -37,4 +37,22 @@ public class TossPaymentsClient {
             throw new BusinessException(ErrorCode.PAYMENT_CONFIRM_FAILED);
         }
     }
+
+    /**
+     * 결제 취소(부분 취소 포함). 같은 요청이 네트워크 문제로 두 번 가도 한 번만 환불되도록
+     * 멱등키를 함께 보낸다.
+     */
+    public void cancel(String paymentKey, String reason, int cancelAmount, String idempotencyKey) {
+        try {
+            restClient.post()
+                .uri("/v1/payments/{paymentKey}/cancel", paymentKey)
+                .header("Idempotency-Key", idempotencyKey)
+                .contentType(MediaType.APPLICATION_JSON)
+                .body(Map.of("cancelReason", reason, "cancelAmount", cancelAmount))
+                .retrieve()
+                .toBodilessEntity();
+        } catch (RestClientResponseException e) {
+            throw new BusinessException(ErrorCode.REFUND_FAILED);
+        }
+    }
 }

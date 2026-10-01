@@ -1,46 +1,25 @@
+# 로컬 개발용 Postgres. 배포는 Supabase(DB·Storage) + Render(백엔드) + Vercel(프론트엔드)를 쓴다.
+#   docker compose up -d
+# FitMate의 Postgres가 5432를 쓰고 있어서 StoreFit은 5433으로 연다.
 services:
-  mysql:
-    image: mysql:8.4
-    restart: unless-stopped
+  postgres:
+    image: postgres:17-alpine
+    container_name: storefit-postgres
+    restart: unless-stopped # Docker Desktop이 다시 켜지면 자동으로 함께 켜진다
     environment:
-      MYSQL_DATABASE: ${DB_NAME}
-      MYSQL_USER: ${DB_USERNAME}
-      MYSQL_PASSWORD: ${DB_PASSWORD}
-      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD}
+      POSTGRES_DB: storefit
+      POSTGRES_USER: storefit
+      POSTGRES_PASSWORD: storefit
+      TZ: Asia/Seoul
+    ports:
+      - "5433:5432"
     volumes:
-      - mysql-data:/var/lib/mysql
+      - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${DB_ROOT_PASSWORD}"]
+      test: ["CMD-SHELL", "pg_isready -U storefit -d storefit"]
       interval: 5s
-      timeout: 5s
+      timeout: 3s
       retries: 10
 
-  backend:
-    build: ./backend
-    restart: unless-stopped
-    depends_on:
-      mysql:
-        condition: service_healthy
-    environment:
-      SPRING_PROFILES_ACTIVE: prod
-      DB_HOST: mysql
-      DB_PORT: 3306
-      DB_NAME: ${DB_NAME}
-      DB_USERNAME: ${DB_USERNAME}
-      DB_PASSWORD: ${DB_PASSWORD}
-      JWT_SECRET: ${JWT_SECRET}
-      TOSS_SECRET_KEY: ${TOSS_SECRET_KEY}
-    volumes:
-      - backend-uploads:/app/uploads
-
-  frontend:
-    build: ./frontend
-    restart: unless-stopped
-    depends_on:
-      - backend
-    ports:
-      - "80:80"
-
 volumes:
-  mysql-data:
-  backend-uploads:
+  postgres-data:

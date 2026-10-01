@@ -1,19 +1,14 @@
+# DB 연결 정보는 TestcontainersConfiguration의 @ServiceConnection이 채운다
 spring:
   application:
     name: luggage-storage
-  datasource:
-    url: jdbc:h2:mem:test;MODE=MySQL;DB_CLOSE_DELAY=-1
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: validate
-    show-sql: true
   flyway:
     enabled: true
-    baseline-on-migrate: true
-    baseline-version: 0
+    locations: classpath:db/migration
 
 jwt:
   secret: test-only-secret-key-not-for-production-use-1234567890
@@ -21,3 +16,40 @@ jwt:
 
 toss:
   secret-key: test_sk_dummy
+
+storage:
+  type: local
+  local:
+    dir: build/test-uploads
+    public-base-url:
+  s3:
+    endpoint:
+    region: ap-northeast-2
+    bucket:
+    access-key:
+    secret-key:
+    public-url:
+    path-style: true
+
+app:
+  cors:
+    allowed-origins: http://localhost:5173
+  demo-data:
+    enabled: false
+  # 스케줄러는 끄고, 테스트에서 StoreLifecycleService를 직접 부른다
+  scheduler:
+    enabled: false
+  admin:
+    username:
+    password:
+  payment-timeout-minutes: 30
+
+# 테스트에서는 실제 문자를 보내지 않고, 인증번호를 응답으로 받아 가입까지 진행한다
+notification:
+  provider: log
+  expose-code: true
+  solapi:
+    api-key:
+    api-secret:
+    sender:
+    pf-id:

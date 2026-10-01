@@ -1,15 +1,14 @@
 package com.luggagestorage.member.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 
+/** 가입한 휴대폰 번호로 인증하면 아이디를 알려준다 */
 public record FindUsernameRequest(
 
-    @NotBlank(message = "이메일은 필수입니다.")
-    @Email(message = "이메일 형식이 올바르지 않습니다.")
-    String email,
+    @NotBlank(message = "휴대폰 번호는 필수입니다.")
+    String phoneNumber,
 
-    @NotBlank(message = "이름은 필수입니다.")
-    String name
+    @NotBlank(message = "휴대폰 인증을 먼저 완료해주세요.")
+    String verificationToken
 ) {
 }

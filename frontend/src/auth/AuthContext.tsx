@@ -1,11 +1,13 @@
-import { createContext, useContext, useMemo, useState, type ReactNode } from 'react'
+import { createContext, useContext, useEffect, useMemo, useState, type ReactNode } from 'react'
 import * as authApi from '../api/auth'
-import { clearStoredAuth, loadStoredAuth, saveStoredAuth, type StoredAuth } from '../lib/api'
+import { clearStoredAuth, loadStoredAuth, saveStoredAuth, toStoredAuth, type StoredAuth } from '../lib/api'
 import type { SignupRequest } from '../types'
 
 interface AuthContextValue {
   user: StoredAuth | null
   isAuthenticated: boolean
+  isOwner: boolean
+  isAdmin: boolean
   login: (username: string, password: string) => Promise<void>
   signup: (request: SignupRequest) => Promise<void>
   logout: () => void
@@ -19,11 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (username: string, password: string) => {
     const response = await authApi.login({ username, password })
-    const auth: StoredAuth = {
-      accessToken: response.accessToken,
-      username: response.username,
-      name: response.name,
-    }
+    const auth = toStoredAuth(response)
     saveStoredAuth(auth)
     setUser(auth)
   }
@@ -34,9 +32,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const logout = () => {
+    // 서버의 리프레시 토큰도 끊는다 (실패해도 이 기기에서는 로그아웃된다)
+    authApi.logout(loadStoredAuth()?.refreshToken ?? null).catch(() => undefined)
     clearStoredAuth()
     setUser(null)
   }
+
+  // 토큰이 조용히 갱신되면(lib/api) 화면이 들고 있는 로그인 정보도 맞춘다
+  useEffect(() => {
+    const sync = () => setUser(loadStoredAuth())
+    window.addEventListener('storefit-auth-refreshed', sync)
+    return () => window.removeEventListener('storefit-auth-refreshed', sync)
+  }, [])
 
   const updateDisplayName = (name: string) => {
     setUser((current) => {
@@ -48,7 +55,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: user !== null, login, signup, logout, updateDisplayName }),
+    () => ({ user, isAuthenticated: user !== null, isOwner: user?.role === 'OWNER', isAdmin: user?.role === 'ADMIN', login, signup, logout, updateDisplayName }),
     [user],
   )
 

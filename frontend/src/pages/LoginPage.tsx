@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { AuthCard } from '../components/Feedback'
 import { getErrorMessage } from '../lib/api'
 
 export function LoginPage() {
@@ -29,32 +30,30 @@ export function LoginPage() {
   }
 
   return (
-    <div className="centered-layout">
-      <div className="centered-card">
-        <h1>로그인</h1>
+    <AuthCard title="다시 만나서 반가워요" subtitle="맡긴 짐, 잘 지내고 있는지 확인해 볼까요?">
         <form className="form" onSubmit={handleSubmit}>
           <label className="form-group">
-            <span>아이디</span>
+            <span className="form-label">아이디</span>
             <input value={username} onChange={(e) => setUsername(e.target.value)} required />
           </label>
           <label className="form-group">
-            <span>비밀번호</span>
+            <span className="form-label">비밀번호</span>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
           </label>
 
           {error && <p className="error-text">{error}</p>}
 
-          <button type="submit" className="btn btn-primary" disabled={submitting}>
+          <button type="submit" className="btn btn-primary btn-lg btn-block" disabled={submitting}>
             {submitting ? '로그인 중...' : '로그인'}
           </button>
         </form>
-        <p className="auth-switch">
-          <Link to="/find-username">아이디 찾기</Link> · <Link to="/reset-password">비밀번호 찾기</Link>
-        </p>
+        <div className="auth-links">
+          <Link to="/find-username">아이디 찾기</Link>
+          <Link to="/reset-password">비밀번호 찾기</Link>
+        </div>
         <p className="auth-switch">
           아직 계정이 없으신가요? <Link to="/signup">회원가입</Link>
         </p>
-      </div>
-    </div>
+    </AuthCard>
   )
 }

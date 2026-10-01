@@ -10,13 +10,13 @@ import java.util.List;
 
 public record StoreUpdateRequest(
 
+    @NotNull(message = "보관소를 선택해주세요.")
+    Long placeId,
+
     @NotBlank(message = "제목은 필수입니다.")
     String name,
 
     String description,
-
-    @NotBlank(message = "주소는 필수입니다.")
-    String address,
 
     List<String> imageUrls,
 

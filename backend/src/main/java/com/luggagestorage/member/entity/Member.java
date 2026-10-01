@@ -54,13 +54,32 @@ public class Member extends BaseTimeEntity {
         return new Member(username, encodedPassword, name, email, phoneNumber, MemberRole.USER);
     }
 
+    public static Member createOwner(String username, String encodedPassword, String name, String email, String phoneNumber) {
+        return new Member(username, encodedPassword, name, email, phoneNumber, MemberRole.OWNER);
+    }
+
+    public boolean isOwner() {
+        return this.role == MemberRole.OWNER;
+    }
+
     public void changePassword(String encodedPassword) {
         this.password = encodedPassword;
     }
 
-    public void updateProfile(String name, String email, String phoneNumber) {
+    public void rename(String name) {
         this.name = name;
-        this.email = email;
+    }
+
+    /** 인증을 마친 번호로만 바꾼다 (MemberService.changePhone) */
+    public void changePhone(String phoneNumber) {
         this.phoneNumber = phoneNumber;
+    }
+
+    public boolean isAdmin() {
+        return this.role == MemberRole.ADMIN;
+    }
+
+    public static Member createAdmin(String username, String encodedPassword, String name) {
+        return new Member(username, encodedPassword, name, null, null, MemberRole.ADMIN);
     }
 }

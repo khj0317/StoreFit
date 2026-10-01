@@ -4,29 +4,33 @@
 # with a dev secret or pointing at the wrong database.
 spring:
   datasource:
-    url: jdbc:mysql://${DB_HOST}:${DB_PORT:3306}/${DB_NAME}?serverTimezone=Asia/Seoul
-    driver-class-name: com.mysql.cj.jdbc.Driver
+    # Supabase → Connect → Session pooler (포트 5432), 예:
+    # jdbc:postgresql://aws-0-ap-northeast-2.pooler.supabase.com:5432/postgres?sslmode=require
+    url: ${DB_URL}
     username: ${DB_USERNAME}
     password: ${DB_PASSWORD}
-  h2:
-    console:
-      enabled: false
-  jpa:
-    hibernate:
-      ddl-auto: validate
-    show-sql: false
-  flyway:
-    enabled: true
-    baseline-on-migrate: true
-    baseline-version: 0
-    # Explicitly overrides application.yml's dev-only db/migration-h2dev addition -- prod's
-    # MySQL always starts from V1's already-correct schema and must never see those
-    # H2-only-syntax migrations.
-    locations: classpath:db/migration
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:5}
 
 jwt:
   secret: ${JWT_SECRET}
-  access-token-expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+  access-token-expiration-ms: ${JWT_EXPIRATION_MS:1800000}
+  refresh-token-expiration-days: ${JWT_REFRESH_DAYS:14}
 
 toss:
   secret-key: ${TOSS_SECRET_KEY}
+
+# 배포 서버는 재시작하면 디스크가 초기화되므로 사진은 Supabase Storage에 저장한다
+storage:
+  type: ${STORAGE_TYPE:s3}
+
+# 배포에서는 실제 문자를 보내고, 인증번호는 절대 응답에 담지 않는다
+notification:
+  provider: ${NOTIFICATION_PROVIDER:solapi}
+  expose-code: false
+
+app:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+  demo-data:
+    enabled: ${DEMO_DATA_ENABLED:false}

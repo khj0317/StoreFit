@@ -1,49 +1,38 @@
 spring:
   application:
     name: luggage-storage
+  # 로컬은 docker-compose의 Postgres(포트 5433, FitMate의 5432와 겹치지 않게) 기본값,
+  # 배포는 환경 변수로 Supabase Postgres에 연결한다 (application-prod.yml 참고)
   datasource:
-    # Absolute path anchored on the user's home directory -- deliberately NOT a relative
-    # path, since relative H2 file paths resolve against whatever the process's working
-    # directory happens to be (different between a terminal `cd backend && ./gradlew
-    # bootRun`, an IDE run configuration, or a packaged jar), which silently pointed each
-    # launch at a different/empty database and looked like data loss on restart.
-    url: jdbc:h2:file:${user.home}/.luggage-storage/luggage;MODE=MySQL
-    driver-class-name: org.h2.Driver
-    username: sa
-    password:
-  h2:
-    console:
-      enabled: true
-      path: /h2-console
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/storefit}
+    username: ${DB_USERNAME:storefit}
+    password: ${DB_PASSWORD:storefit}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
   jpa:
+    open-in-view: false
     hibernate:
       # Hibernate no longer mutates the schema. It only checks that the entities match
       # what's actually in the DB, and fails loudly (instead of silently) if they don't.
-      # Schema changes now go through versioned Flyway migrations in db/migration --
+      # Schema changes go through versioned Flyway migrations in db/migration --
       # ddl-auto: update used to try to auto-ALTER the table on every restart, and when a
       # new NOT NULL column was added to a table that already had rows (e.g. `username` on
       # `members`), the ALTER silently failed and Hibernate just logged a warning and kept
-      # booting, leaving the live schema out of sync with the entities. Every later query
-      # touching that column then broke, which looked like member data disappearing.
+      # booting, leaving the live schema out of sync with the entities.
       ddl-auto: validate
-    show-sql: true
-    properties:
-      hibernate:
-        format_sql: true
+    show-sql: false
   flyway:
     enabled: true
-    baseline-on-migrate: true
-    baseline-version: 0
-    # db/migration-h2dev only fixes up old local H2 dev databases and uses H2-only ALTER
-    # syntax; it's added here (not in the shared db/migration) so prod's MySQL never sees it.
-    locations: classpath:db/migration,classpath:db/migration-h2dev
+    locations: classpath:db/migration
   servlet:
     multipart:
       max-file-size: 10MB
       max-request-size: 30MB
 
 server:
-  port: 8080
+  port: ${PORT:8080}
+  # Render 같은 프록시 뒤에서 https 주소를 올바르게 인식한다
+  forward-headers-strategy: native
 
 springdoc:
   swagger-ui:
@@ -54,10 +43,68 @@ springdoc:
 jwt:
   # Overridable via env var so a real deployment doesn't ship with this dev-only value.
   secret: ${JWT_SECRET:dev-only-secret-key-change-this-before-deploying-to-production-1234567890}
-  access-token-expiration-ms: ${JWT_EXPIRATION_MS:3600000}
+  # 액세스 토큰은 짧게(30분) 두고, 만료되면 리프레시 토큰(14일)으로 조용히 다시 받는다
+  access-token-expiration-ms: ${JWT_EXPIRATION_MS:1800000}
+  refresh-token-expiration-days: ${JWT_REFRESH_DAYS:14}
 
 # Toss Payments' own published sandbox test key (safe to share, no real merchant/money attached).
 # Overridable via env var -- set TOSS_SECRET_KEY to your real secret key from
 # https://developers.tosspayments.com before going live.
 toss:
   secret-key: ${TOSS_SECRET_KEY:test_sk_zXLkKEypNArWmo50nX3lmeaxYG5R}
+
+# 사진 저장소: local(개발, backend/uploads 폴더) 또는 s3(배포, Supabase Storage 등 S3 호환)
+storage:
+  type: ${STORAGE_TYPE:local}
+  local:
+    dir: ${STORAGE_LOCAL_DIR:./uploads}
+    # 사진 URL 앞에 붙일 백엔드 주소. 비우면 /uploads/... 상대 경로 (개발 중에는 Vite 프록시가 처리)
+    public-base-url: ${STORAGE_PUBLIC_BASE_URL:}
+  s3:
+    endpoint: ${S3_ENDPOINT:}
+    region: ${S3_REGION:ap-northeast-2}
+    bucket: ${S3_BUCKET:}
+    access-key: ${S3_ACCESS_KEY:}
+    secret-key: ${S3_SECRET_KEY:}
+    public-url: ${S3_PUBLIC_URL:}
+    path-style: ${S3_PATH_STYLE:true}
+
+# 문자·카카오 알림톡: log(개발, 서버 로그에만 남김) 또는 solapi(배포)
+notification:
+  provider: ${NOTIFICATION_PROVIDER:log}
+  # 문자가 실제로 가지 않는 개발 환경에서는 인증번호를 화면에 보여준다
+  expose-code: ${NOTIFICATION_EXPOSE_CODE:true}
+  solapi:
+    api-key: ${SOLAPI_API_KEY:}
+    api-secret: ${SOLAPI_API_SECRET:}
+    # 솔라피에 등록·인증한 발신번호 (숫자만)
+    sender: ${SOLAPI_SENDER:}
+    # 카카오 알림톡 채널 ID. 비우면 모든 알림을 문자로 보낸다
+    pf-id: ${SOLAPI_KAKAO_PF_ID:}
+    # 알림 종류별로 카카오에서 승인받은 알림톡 템플릿 ID (없는 종류는 문자로 보낸다)
+    templates:
+      PAYMENT_DONE: ${KAKAO_TEMPLATE_PAYMENT_DONE:}
+      NEW_RESERVATION: ${KAKAO_TEMPLATE_NEW_RESERVATION:}
+      CHECKED_IN: ${KAKAO_TEMPLATE_CHECKED_IN:}
+      CHECKED_OUT: ${KAKAO_TEMPLATE_CHECKED_OUT:}
+      PICKUP_REMINDER: ${KAKAO_TEMPLATE_PICKUP_REMINDER:}
+      OVERDUE: ${KAKAO_TEMPLATE_OVERDUE:}
+      REFUNDED: ${KAKAO_TEMPLATE_REFUNDED:}
+      PAYMENT_EXPIRED: ${KAKAO_TEMPLATE_PAYMENT_EXPIRED:}
+      NO_SHOW: ${KAKAO_TEMPLATE_NO_SHOW:}
+      BRANCH_APPROVED: ${KAKAO_TEMPLATE_BRANCH_APPROVED:}
+      BRANCH_REJECTED: ${KAKAO_TEMPLATE_BRANCH_REJECTED:}
+
+app:
+  # 여러 개면 쉼표로 구분, * 패턴 가능 (예: https://storefit-*.vercel.app)
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+  # 로컬에서 바로 예약해볼 수 있도록 데모 운영자와 보관소를 만든다 (배포에서는 끔)
+  demo-data:
+    enabled: ${DEMO_DATA_ENABLED:true}
+  # 관리자 계정. 아이디·비밀번호를 둘 다 넣으면 서버가 켜질 때 없으면 만든다
+  admin:
+    username: ${ADMIN_USERNAME:}
+    password: ${ADMIN_PASSWORD:}
+  # 결제하지 않은 예약을 자동 취소하기까지의 시간
+  payment-timeout-minutes: ${PAYMENT_TIMEOUT_MINUTES:30}

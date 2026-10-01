@@ -1,6 +1,7 @@
 package com.luggagestorage.member.controller;
 
 import com.luggagestorage.member.dto.ChangePasswordRequest;
+import com.luggagestorage.member.dto.ChangePhoneRequest;
 import com.luggagestorage.member.dto.DeleteAccountRequest;
 import com.luggagestorage.member.dto.MemberProfileResponse;
 import com.luggagestorage.member.dto.UpdateProfileRequest;
@@ -31,6 +32,12 @@ public class MemberController {
     @PatchMapping
     public ResponseEntity<MemberProfileResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest request) {
         return ResponseEntity.ok(memberService.updateProfile(request));
+    }
+
+    /** 새 번호로 휴대폰 인증(purpose=CHANGE_PHONE)을 마친 뒤 바꾼다 */
+    @PatchMapping("/phone")
+    public ResponseEntity<MemberProfileResponse> changePhone(@Valid @RequestBody ChangePhoneRequest request) {
+        return ResponseEntity.ok(memberService.changePhone(request));
     }
 
     @PostMapping("/password")

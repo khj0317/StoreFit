@@ -1,8 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { Link, useParams } from 'react-router-dom'
 import { getStore } from '../api/stores'
 import { readyPayment } from '../api/payments'
 import { useAuth } from '../auth/AuthContext'
+import { CategoryIcon } from '../components/CategoryIcon'
+import { AuthCard, Loading } from '../components/Feedback'
+import { CardIcon } from '../components/Icons'
 import { STORE_CATEGORY_LABELS } from '../constants/storeCategories'
 import { getErrorMessage } from '../lib/api'
 import { requestTossPayment } from '../lib/tossPayments'
@@ -48,17 +51,18 @@ export function StorePaymentPage() {
   }
 
   if (!store) {
-    return <p>불러오는 중...</p>
+    return <Loading />
   }
 
   if (store.paymentStatus === 'DONE') {
     return (
-      <div className="centered-layout">
-        <div className="centered-card">
-          <h1>결제 완료</h1>
-          <p>이미 결제가 완료된 짐 보관입니다.</p>
+      <AuthCard title="이미 결제가 끝났어요" subtitle="이 짐 보관은 결제가 완료된 상태예요.">
+        <div className="result-actions">
+          <Link to="/my/stores" className="btn btn-primary btn-lg">
+            보관 현황으로
+          </Link>
         </div>
-      </div>
+      </AuthCard>
     )
   }
 
@@ -68,17 +72,20 @@ export function StorePaymentPage() {
     <div className="centered-layout">
       <div className="centered-card">
         <h1>결제하기</h1>
-        <div className="payment-summary">
-          <div className="payment-summary-row">
-            <span>제목</span>
-            <span>{store.name}</span>
+        <div className="receipt">
+          <div className="receipt-head" data-tone={store.category}>
+            <CategoryIcon category={store.category} size="sm" />
+            <div>
+              <strong>{store.name}</strong>
+              <span>{STORE_CATEGORY_LABELS[store.category]}</span>
+            </div>
           </div>
           <div className="payment-summary-row">
-            <span>짐 종류</span>
-            <span>{STORE_CATEGORY_LABELS[store.category]}</span>
+            <span>지점</span>
+            <span>{store.placeName}</span>
           </div>
           <div className="payment-summary-row">
-            <span>기간</span>
+            <span>보관 기간</span>
             <span>
               {store.startDate} ~ {store.endDate} ({days}일)
             </span>
@@ -95,9 +102,17 @@ export function StorePaymentPage() {
 
         {error && <p className="error-text">{error}</p>}
 
-        <button type="button" className="btn btn-primary" onClick={handlePay} disabled={submitting}>
+        <button type="button" className="btn btn-primary btn-lg btn-block" onClick={handlePay} disabled={submitting}>
+          <CardIcon size={18} />
           {submitting ? '결제 진행 중...' : `${store.totalPrice.toLocaleString()}원 결제하기`}
         </button>
+        <p className="secure-note">안전한 결제창에서 결제가 진행돼요</p>
+        {store.paymentDeadline && (
+          <p className="secure-note">
+            {new Date(store.paymentDeadline).toLocaleTimeString('ko-KR', { hour: '2-digit', minute: '2-digit' })}까지 결제하지
+            않으면 예약이 자동 취소돼요
+          </p>
+        )}
       </div>
     </div>
   )

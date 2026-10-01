@@ -49,6 +49,11 @@ public class Payment extends BaseTimeEntity {
 
     private LocalDateTime approvedAt;
 
+    @Column(nullable = false)
+    private Integer canceledAmount = 0;
+
+    private LocalDateTime canceledAt;
+
     public Payment(Store store, String orderId, Integer amount) {
         this.store = store;
         this.orderId = orderId;
@@ -61,6 +66,23 @@ public class Payment extends BaseTimeEntity {
         this.paymentKey = paymentKey;
         this.method = method;
         this.approvedAt = approvedAt;
+    }
+
+    public void cancel(int amount, LocalDateTime canceledAt) {
+        this.canceledAmount = amount;
+        this.canceledAt = canceledAt;
+        this.status = amount >= this.amount ? PaymentStatus.CANCELED : PaymentStatus.PARTIAL_CANCELED;
+    }
+
+    /** 결제창만 열고 결제하지 않은 채 예약이 자동 취소됨 */
+    public void expire() {
+        if (this.status == PaymentStatus.READY) {
+            this.status = PaymentStatus.FAILED;
+        }
+    }
+
+    public boolean isPaid() {
+        return this.status == PaymentStatus.DONE;
     }
 
     public boolean isOwnedBy(Long memberId) {
