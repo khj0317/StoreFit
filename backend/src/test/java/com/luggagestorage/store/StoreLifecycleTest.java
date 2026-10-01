@@ -142,6 +142,23 @@ class StoreLifecycleTest extends IntegrationTest {
     }
 
     @Test
+    void dailyNotices_areSentOnlyOncePerDay_evenIfCheckedAgain() throws Exception {
+        String owner = signupAndLogin("OWNER");
+        long placeId = createPlace(owner, 5);
+        Login user = signup("USER");
+        LocalDate today = LocalDate.now();
+        String code = pay(user.accessToken(), reservedId(user.accessToken(), placeId, 1, today, today));
+        call(HttpMethod.POST, "/api/owner/check-ins/" + code + "/check-in", null, owner).andExpect(status().isOk());
+        jdbcTemplate.update("update stores set start_date = start_date - 1, end_date = end_date - 1 where check_in_code = ?", code);
+        jdbcTemplate.update("delete from daily_job_runs");
+
+        // 서버가 잠들었다 깨어나 여러 번 확인해도 오늘의 알림은 한 번만 나간다
+        assertThat(lifecycleService.sendDailyNoticesOnce()).isTrue();
+        assertThat(lifecycleService.sendDailyNoticesOnce()).isFalse();
+        assertThat(notificationTypesOf(user.phone())).filteredOn(NotificationType.OVERDUE.name()::equals).hasSize(1);
+    }
+
+    @Test
     void reservationJourney_sendsNotificationsToUserAndOwner() throws Exception {
         Login owner = signup("OWNER");
         long placeId = createPlace(owner.accessToken(), 5);

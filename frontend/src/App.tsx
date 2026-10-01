@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router-dom'
 import './App.css'
 import { Navbar } from './components/Navbar'
 import { ProtectedRoute } from './components/ProtectedRoute'
+import { ServerWakeBanner } from './components/ServerWakeBanner'
 import { FindUsernamePage } from './pages/FindUsernamePage'
 import { HomePage } from './pages/HomePage'
 import { LoginPage } from './pages/LoginPage'
@@ -27,6 +28,7 @@ function App() {
     <div className="app-shell">
       <Navbar />
       <main className="app-content">
+        <ServerWakeBanner />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />

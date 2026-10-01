@@ -7,6 +7,7 @@ import com.luggagestorage.store.entity.StoreStatus;
 import com.luggagestorage.store.repository.StoreRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -20,7 +21,7 @@ import java.util.List;
  * 테스트에서는 직접 불러서 검증한다.
  * - 결제 마감이 지난 미결제 예약 → EXPIRED (자리 반환)
  * - 결제했지만 시작일에 체크인하지 않은 예약 → NO_SHOW (자리 반환, 환불 없음)
- * - 찾는 날 하루 전 알림, 찾는 날이 지난 짐 연체 알림
+ * - 찾는 날 하루 전 알림, 찾는 날이 지난 짐 연체 알림 (하루 한 번)
  */
 @Slf4j
 @Service
@@ -31,6 +32,9 @@ public class StoreLifecycleService {
     private final PaymentRepository paymentRepository;
     private final ReservationNotifier reservationNotifier;
     private final Clock clock;
+    private final JdbcTemplate jdbcTemplate;
+
+    private static final String DAILY_NOTICES_JOB = "DAILY_NOTICES";
 
     /** @return 자동 취소한 예약 수 */
     @Transactional
@@ -67,6 +71,27 @@ public class StoreLifecycleService {
             log.info("시작일에 체크인하지 않은 예약 {}건을 노쇼 처리했습니다.", stores.size());
         }
         return stores.size();
+    }
+
+    /**
+     * 오늘 찾는 날 알림·연체 알림을 아직 보내지 않았으면 보낸다. 서버가 잠들었다 깨어나도 하루에 한 번만 나가도록
+     * daily_job_runs에 오늘 날짜를 먼저 넣고, 이미 있으면(다른 실행이 보냈으면) 건너뛴다.
+     * 알림 기록이 저장되다 실패하면 같은 트랜잭션이라 날짜 기록도 함께 취소돼서 다음에 다시 시도한다.
+     *
+     * @return 이번에 보냈으면 true
+     */
+    @Transactional
+    public boolean sendDailyNoticesOnce() {
+        int claimed = jdbcTemplate.update(
+            "insert into daily_job_runs (job_name, run_date) values (?, ?) on conflict do nothing",
+            DAILY_NOTICES_JOB, LocalDate.now(clock));
+        if (claimed == 0) {
+            return false;
+        }
+        int reminders = sendPickupReminders();
+        int overdue = sendOverdueNotices();
+        log.info("오늘의 알림을 보냈습니다. 찾는 날 알림 {}건, 연체 알림 {}건", reminders, overdue);
+        return true;
     }
 
     /** 내일이 찾는 날인 보관 중 짐에 알림을 보낸다 */

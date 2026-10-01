@@ -1,6 +1,6 @@
 # ERD
 
-스키마는 Flyway 마이그레이션(`backend/src/main/resources/db/migration`, V1~V7)이 만든다. 아래는 현재 기준이다.
+스키마는 Flyway 마이그레이션(`backend/src/main/resources/db/migration`, V1~V8)이 만든다. 아래는 현재 기준이다.
 
 ```mermaid
 erDiagram

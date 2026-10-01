@@ -1,5 +1,6 @@
-import axios, { type AxiosRequestConfig } from 'axios'
+import axios, { type AxiosError, type AxiosRequestConfig } from 'axios'
 import type { LoginResponse, MemberRole } from '../types'
+import { whenServerSettled } from './serverWake'
 
 const AUTH_STORAGE_KEY = 'luggage-storage-auth'
 
@@ -56,7 +57,9 @@ export const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL ?? '/api',
 })
 
-api.interceptors.request.use((config) => {
+api.interceptors.request.use(async (config) => {
+  // 잠든 배포 서버가 깨어나는 중이면 요청을 잠깐 미뤘다가 보낸다 (lib/serverWake.ts)
+  await whenServerSettled()
   const auth = loadStoredAuth()
   if (auth?.accessToken) {
     config.headers.Authorization = `Bearer ${auth.accessToken}`
@@ -98,9 +101,29 @@ function forceLogout() {
   }
 }
 
+// 서버가 막 깨어나는 중에는 게이트웨이 오류(502·503·504)나 연결 실패가 잠깐 날 수 있다.
+// 다시 보내도 안전한 조회(GET)만 몇 번 더 시도한다.
+const RETRYABLE_STATUS = new Set([502, 503, 504])
+const MAX_GET_RETRIES = 2
+
+function isRetryableGet(error: unknown): error is AxiosError & { config: AxiosRequestConfig & { _retryCount?: number } } {
+  if (!axios.isAxiosError(error) || !error.config) return false
+  if ((error.config.method ?? 'get').toLowerCase() !== 'get') return false
+  if (error.code === 'ERR_CANCELED') return false
+  return !error.response || RETRYABLE_STATUS.has(error.response.status)
+}
+
 api.interceptors.response.use(
   (response) => response,
   async (error: unknown) => {
+    if (isRetryableGet(error)) {
+      const config = error.config
+      config._retryCount = (config._retryCount ?? 0) + 1
+      if (config._retryCount <= MAX_GET_RETRIES) {
+        await new Promise((resolve) => window.setTimeout(resolve, 3000))
+        return api.request(config)
+      }
+    }
     if (axios.isAxiosError<ApiErrorResponse>(error) && error.response?.data?.code === 'INVALID_TOKEN') {
       const original = error.config as (AxiosRequestConfig & { _retried?: boolean }) | undefined
       if (original && !original._retried) {
