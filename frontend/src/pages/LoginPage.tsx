@@ -1,6 +1,7 @@
 import { type FormEvent, useState } from 'react'
 import { Link, useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../auth/AuthContext'
+import { DemoEntry } from '../components/DemoEntry'
 import { AuthCard } from '../components/Feedback'
 import { getErrorMessage } from '../lib/api'
 
@@ -54,6 +55,7 @@ export function LoginPage() {
         <p className="auth-switch">
           아직 계정이 없으신가요? <Link to="/signup">회원가입</Link>
         </p>
+        <DemoEntry />
     </AuthCard>
   )
 }

@@ -10,6 +10,7 @@ export interface StoredAuth {
   username: string
   name: string
   role: MemberRole
+  demo: boolean
 }
 
 export function loadStoredAuth(): StoredAuth | null {
@@ -25,6 +26,7 @@ export function loadStoredAuth(): StoredAuth | null {
       username: parsed.username,
       name: parsed.name ?? '',
       role: parsed.role ?? 'USER',
+      demo: parsed.demo ?? false,
     }
   } catch {
     return null
@@ -46,6 +48,7 @@ export function toStoredAuth(response: LoginResponse): StoredAuth {
     username: response.username,
     name: response.name,
     role: response.role,
+    demo: response.demo ?? false,
   }
 }
 

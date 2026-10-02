@@ -8,6 +8,7 @@ import com.luggagestorage.notification.NotificationService;
 import com.luggagestorage.notification.NotificationType;
 import com.luggagestorage.verification.dto.SendCodeResponse;
 import lombok.RequiredArgsConstructor;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -15,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.security.SecureRandom;
 import java.time.Clock;
 import java.time.Duration;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HexFormat;
 import java.util.Map;
@@ -22,8 +24,10 @@ import java.util.Map;
 /**
  * 휴대폰 인증: 인증번호 발송 → 확인 → 일회용 토큰 발급 → 가입·아이디 찾기 등에서 토큰 사용.
  * 문자 비용과 무작위 대입을 막기 위해 재전송 간격, 시간당 발송 횟수, 입력 시도 횟수를 제한한다.
+ * 번호를 바꿔 가며 요청하는 남용은 IP별 한도와 하루 전체 상한(VerificationLimits)으로 막는다.
  */
 @Service
+@EnableConfigurationProperties(VerificationLimits.class)
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class PhoneVerificationService {
@@ -38,11 +42,12 @@ public class PhoneVerificationService {
     private final NotificationService notificationService;
     private final NotificationProperties notificationProperties;
     private final PasswordEncoder passwordEncoder;
+    private final VerificationLimits limits;
     private final Clock clock;
     private final SecureRandom random = new SecureRandom();
 
     @Transactional
-    public SendCodeResponse sendCode(String rawPhone, VerificationPurpose purpose) {
+    public SendCodeResponse sendCode(String rawPhone, VerificationPurpose purpose, String requestIp) {
         String phone = PhoneNumbers.normalize(rawPhone);
         LocalDateTime now = LocalDateTime.now(clock);
 
@@ -62,9 +67,17 @@ public class PhoneVerificationService {
         if (verificationRepository.countByPhoneNumberAndCreatedAtAfter(phone, now.minusHours(1)) >= MAX_SENDS_PER_HOUR) {
             throw new BusinessException(ErrorCode.VERIFICATION_TOO_MANY);
         }
+        if (requestIp != null
+            && verificationRepository.countByRequestIpAndCreatedAtAfter(requestIp, now.minusHours(1)) >= limits.maxSendsPerIpPerHour()) {
+            throw new BusinessException(ErrorCode.VERIFICATION_IP_LIMIT);
+        }
+        if (limits.dailyLimit() > 0
+            && verificationRepository.countByCreatedAtGreaterThanEqual(LocalDate.now(clock).atStartOfDay()) >= limits.dailyLimit()) {
+            throw new BusinessException(ErrorCode.VERIFICATION_DAILY_LIMIT);
+        }
 
         String code = String.format("%06d", random.nextInt(1_000_000));
-        verificationRepository.save(new PhoneVerification(phone, purpose, passwordEncoder.encode(code), now, now.plus(CODE_TTL)));
+        verificationRepository.save(new PhoneVerification(phone, purpose, passwordEncoder.encode(code), now, now.plus(CODE_TTL), requestIp));
         notificationService.send(null, phone, NotificationType.VERIFICATION_CODE, Map.of("code", code));
 
         return new SendCodeResponse(CODE_TTL.toSeconds(), notificationProperties.exposeCode() ? code : null);

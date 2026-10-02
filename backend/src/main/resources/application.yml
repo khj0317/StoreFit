@@ -102,6 +102,13 @@ app:
   # 로컬에서 바로 예약해볼 수 있도록 데모 운영자와 보관소를 만든다 (배포에서는 끔)
   demo-data:
     enabled: ${DEMO_DATA_ENABLED:true}
+  # 로그인 화면의 "둘러보기" 체험 계정 (체험 이용자·사장님, 데이터는 매일 초기화)
+  demo:
+    enabled: ${DEMO_ENABLED:true}
+  # 인증 문자 남용 방지: IP별 시간당 한도, 하루 전체 상한(0이면 제한 없음, 개발에서는 문자가 실제로 가지 않으므로 끔)
+  verification:
+    max-sends-per-ip-per-hour: ${VERIFICATION_MAX_PER_IP:10}
+    daily-limit: ${VERIFICATION_DAILY_LIMIT:0}
   # 관리자 계정. 아이디·비밀번호를 둘 다 넣으면 서버가 켜질 때 없으면 만든다
   admin:
     username: ${ADMIN_USERNAME:}

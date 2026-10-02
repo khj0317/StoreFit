@@ -58,9 +58,14 @@ public class PhoneVerification {
 
     private LocalDateTime usedAt;
 
+    /** 인증 문자를 요청한 곳 (IP별 발송 한도에 쓴다) */
+    @Column(length = 64)
+    private String requestIp;
+
     public PhoneVerification(String phoneNumber, VerificationPurpose purpose, String codeHash,
-                             LocalDateTime createdAt, LocalDateTime expiresAt) {
+                             LocalDateTime createdAt, LocalDateTime expiresAt, String requestIp) {
         this.phoneNumber = phoneNumber;
+        this.requestIp = requestIp;
         this.purpose = purpose;
         this.codeHash = codeHash;
         this.createdAt = createdAt;

@@ -122,8 +122,18 @@ public abstract class IntegrationTest {
         return login(username, null).accessToken();
     }
 
+    /**
+     * 인증 문자는 IP별 발송 한도가 있어서, 테스트끼리 한도를 나눠 쓰지 않게 요청마다 다른 IP에서 온 것처럼 보낸다.
+     * IP 한도 자체를 시험할 때는 callFrom으로 IP를 정한다.
+     */
     protected ResultActions call(HttpMethod method, String url, String json, String accessToken) throws Exception {
-        MockHttpServletRequestBuilder builder = request(method, url);
+        ThreadLocalRandom random = ThreadLocalRandom.current();
+        String ip = "10." + random.nextInt(256) + "." + random.nextInt(256) + "." + random.nextInt(1, 255);
+        return callFrom(ip, method, url, json, accessToken);
+    }
+
+    protected ResultActions callFrom(String ip, HttpMethod method, String url, String json, String accessToken) throws Exception {
+        MockHttpServletRequestBuilder builder = request(method, url).header("X-Forwarded-For", ip);
         if (json != null) {
             builder.contentType(MediaType.APPLICATION_JSON).content(json);
         }

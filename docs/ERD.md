@@ -1,6 +1,6 @@
 # ERD
 
-스키마는 Flyway 마이그레이션(`backend/src/main/resources/db/migration`, V1~V8)이 만든다. 아래는 현재 기준이다.
+스키마는 Flyway 마이그레이션(`backend/src/main/resources/db/migration`, V1~V9)이 만든다. 아래는 현재 기준이다.
 
 ```mermaid
 erDiagram
@@ -91,6 +91,7 @@ erDiagram
         timestamp expires_at
         int attempts
         varchar token UK "인증 후 발급하는 일회용 토큰"
+        varchar request_ip "요청한 곳 (IP별 발송 한도)"
         timestamp used_at
     }
 

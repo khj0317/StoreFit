@@ -72,6 +72,11 @@ services:
         sync: false
       - key: DEMO_DATA_ENABLED
         value: "false"
+      # ---- 로그인 화면 "둘러보기" 체험 계정, 인증 문자 하루 상한 ----
+      - key: DEMO_ENABLED
+        value: "true"
+      - key: VERIFICATION_DAILY_LIMIT
+        value: "30"
       # ---- 무료 플랜(메모리 512MB)에 맞춘 JVM 설정 (FitMate에서 검증한 값) ----
       - key: JAVA_TOOL_OPTIONS
         value: >-

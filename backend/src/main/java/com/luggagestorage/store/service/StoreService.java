@@ -3,6 +3,7 @@ package com.luggagestorage.store.service;
 import com.luggagestorage.auth.security.SecurityUtil;
 import com.luggagestorage.common.exception.BusinessException;
 import com.luggagestorage.common.exception.ErrorCode;
+import com.luggagestorage.demo.DemoAccounts;
 import com.luggagestorage.member.entity.Member;
 import com.luggagestorage.member.repository.MemberRepository;
 import com.luggagestorage.payment.client.TossPaymentsClient;
@@ -173,7 +174,8 @@ public class StoreService {
         Payment payment = requirePaidPending(store);
 
         int refundAmount = RefundPolicy.refundAmount(payment.getAmount(), LocalDate.now(clock), store.getStartDate());
-        if (refundAmount > 0) {
+        // 체험 데이터의 결제는 결제사에 없는 결제라 결제사를 부르지 않고 환불 상태만 남긴다
+        if (refundAmount > 0 && !DemoAccounts.isDemoPayment(payment)) {
             tossPaymentsClient.cancel(payment.getPaymentKey(), "고객 요청 취소", refundAmount, "cancel-" + payment.getOrderId());
         }
         payment.cancel(refundAmount, LocalDateTime.now(clock));

@@ -35,6 +35,8 @@ export interface LoginResponse {
   username: string
   name: string
   role: MemberRole
+  /** 로그인 화면 "둘러보기"로 들어온 체험 계정 */
+  demo: boolean
 }
 
 export interface FindUsernameRequest {

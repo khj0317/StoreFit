@@ -258,7 +258,7 @@ export function HomePage() {
                     지금 시작하기 <ArrowRightIcon size={18} />
                   </Link>
                   <Link to="/login" className="btn btn-ghost btn-lg">
-                    로그인
+                    가입 없이 둘러보기
                   </Link>
                 </>
               )}

@@ -36,6 +36,11 @@ app:
     allowed-origins: http://localhost:5173
   demo-data:
     enabled: false
+  demo:
+    enabled: true
+  verification:
+    max-sends-per-ip-per-hour: 10
+    daily-limit: 0
   # 스케줄러는 끄고, 테스트에서 StoreLifecycleService를 직접 부른다
   scheduler:
     enabled: false

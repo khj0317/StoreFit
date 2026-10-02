@@ -1,5 +1,6 @@
 import { Route, Routes } from 'react-router-dom'
 import './App.css'
+import { DemoBanner } from './components/DemoEntry'
 import { Navbar } from './components/Navbar'
 import { ProtectedRoute } from './components/ProtectedRoute'
 import { ServerWakeBanner } from './components/ServerWakeBanner'
@@ -29,6 +30,7 @@ function App() {
       <Navbar />
       <main className="app-content">
         <ServerWakeBanner />
+        <DemoBanner />
         <Routes>
           <Route path="/" element={<HomePage />} />
           <Route path="/login" element={<LoginPage />} />

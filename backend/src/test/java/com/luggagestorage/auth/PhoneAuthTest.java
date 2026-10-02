@@ -132,6 +132,28 @@ class PhoneAuthTest extends IntegrationTest {
     }
 
     @Test
+    void manyNumbersFromOneIp_areLimitedPerHour() throws Exception {
+        // 번호를 바꿔 가며 문자를 보내게 하는 남용: 한 곳(IP)에서는 시간당 10번까지만 보낼 수 있다
+        String ip = "203.0.113." + java.util.concurrent.ThreadLocalRandom.current().nextInt(1, 255);
+        for (int i = 0; i < 10; i++) {
+            callFrom(ip, HttpMethod.POST, "/api/auth/phone/send", """
+                {"phoneNumber": "%s", "purpose": "SIGNUP"}
+                """.formatted(uniquePhone()), null)
+                .andExpect(status().isOk());
+        }
+        callFrom(ip, HttpMethod.POST, "/api/auth/phone/send", """
+            {"phoneNumber": "%s", "purpose": "SIGNUP"}
+            """.formatted(uniquePhone()), null)
+            .andExpect(status().isTooManyRequests())
+            .andExpect(jsonPath("$.code").value("VERIFICATION_IP_LIMIT"));
+        // 프록시를 거쳐도 맨 앞의 원래 주소로 센다
+        callFrom(ip + ", 74.220.52.132", HttpMethod.POST, "/api/auth/phone/send", """
+            {"phoneNumber": "%s", "purpose": "SIGNUP"}
+            """.formatted(uniquePhone()), null)
+            .andExpect(status().isTooManyRequests());
+    }
+
+    @Test
     void findUsernameAndResetPassword_byPhone() throws Exception {
         Login user = signup("USER");
 

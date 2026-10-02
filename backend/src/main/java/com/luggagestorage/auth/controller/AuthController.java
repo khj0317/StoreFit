@@ -1,5 +1,6 @@
 package com.luggagestorage.auth.controller;
 
+import com.luggagestorage.auth.dto.DemoLoginRequest;
 import com.luggagestorage.auth.dto.LoginRequest;
 import com.luggagestorage.auth.dto.LoginResponse;
 import com.luggagestorage.auth.dto.RefreshRequest;
@@ -8,6 +9,8 @@ import com.luggagestorage.auth.service.LoginAttemptService;
 import com.luggagestorage.auth.service.RefreshTokenService;
 import com.luggagestorage.common.exception.BusinessException;
 import com.luggagestorage.common.exception.ErrorCode;
+import com.luggagestorage.demo.DemoAccounts;
+import com.luggagestorage.demo.DemoService;
 import com.luggagestorage.member.dto.FindUsernameRequest;
 import com.luggagestorage.member.dto.FindUsernameResponse;
 import com.luggagestorage.member.dto.ResetPasswordRequest;
@@ -39,6 +42,7 @@ public class AuthController {
     private final JwtTokenProvider jwtTokenProvider;
     private final RefreshTokenService refreshTokenService;
     private final LoginAttemptService loginAttemptService;
+    private final DemoService demoService;
 
     @PostMapping("/signup")
     public ResponseEntity<SignupResponse> signup(@Valid @RequestBody SignupRequest request) {
@@ -61,6 +65,13 @@ public class AuthController {
         Member member = memberRepository.findByUsername(request.username())
             .orElseThrow(() -> new BusinessException(ErrorCode.INVALID_CREDENTIALS));
 
+        return ResponseEntity.ok(tokensFor(member, refreshTokenService.issue(member)));
+    }
+
+    /** 휴대폰 인증 없이 둘러볼 수 있는 체험 계정으로 로그인한다 */
+    @PostMapping("/demo-login")
+    public ResponseEntity<LoginResponse> demoLogin(@Valid @RequestBody DemoLoginRequest request) {
+        Member member = demoService.demoMember(request.role());
         return ResponseEntity.ok(tokensFor(member, refreshTokenService.issue(member)));
     }
 
@@ -90,6 +101,7 @@ public class AuthController {
 
     private LoginResponse tokensFor(Member member, String refreshToken) {
         String accessToken = jwtTokenProvider.createAccessToken(member.getUsername(), member.getRole().name());
-        return LoginResponse.of(accessToken, refreshToken, member.getUsername(), member.getName(), member.getRole());
+        return LoginResponse.of(accessToken, refreshToken, member.getUsername(), member.getName(), member.getRole(),
+            DemoAccounts.isDemo(member));
     }
 }

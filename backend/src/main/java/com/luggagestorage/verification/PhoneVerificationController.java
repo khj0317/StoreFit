@@ -2,6 +2,7 @@ package com.luggagestorage.verification;
 
 import com.luggagestorage.verification.dto.PhoneCodeRequests;
 import com.luggagestorage.verification.dto.SendCodeResponse;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -19,8 +20,8 @@ public class PhoneVerificationController {
     private final PhoneVerificationService phoneVerificationService;
 
     @PostMapping("/send")
-    public ResponseEntity<SendCodeResponse> send(@Valid @RequestBody PhoneCodeRequests.Send request) {
-        return ResponseEntity.ok(phoneVerificationService.sendCode(request.phoneNumber(), request.purpose()));
+    public ResponseEntity<SendCodeResponse> send(@Valid @RequestBody PhoneCodeRequests.Send request, HttpServletRequest http) {
+        return ResponseEntity.ok(phoneVerificationService.sendCode(request.phoneNumber(), request.purpose(), ClientIp.of(http)));
     }
 
     @PostMapping("/verify")

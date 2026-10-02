@@ -1,5 +1,6 @@
 package com.luggagestorage.notification;
 
+import com.luggagestorage.demo.DemoAccounts;
 import com.luggagestorage.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -33,10 +34,10 @@ public class NotificationService {
     public record NotificationRequested(Long notificationId, String text, Map<String, String> variables) {
     }
 
-    /** 회원에게 보낸다. 번호가 없는 회원(예전 계정·관리자)은 건너뛴다 */
+    /** 회원에게 보낸다. 번호가 없는 회원(예전 계정·관리자)과 체험 계정(실제로 없는 번호)은 건너뛴다 */
     @Transactional(propagation = Propagation.REQUIRED)
     public void notify(Member member, NotificationType type, Map<String, String> variables) {
-        if (member == null || member.getPhoneNumber() == null || member.getPhoneNumber().isBlank()) {
+        if (member == null || member.getPhoneNumber() == null || member.getPhoneNumber().isBlank() || DemoAccounts.isDemo(member)) {
             return;
         }
         send(member, member.getPhoneNumber(), type, variables);

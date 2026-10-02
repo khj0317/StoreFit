@@ -9,6 +9,7 @@ interface AuthContextValue {
   isOwner: boolean
   isAdmin: boolean
   login: (username: string, password: string) => Promise<void>
+  demoLogin: (role: 'USER' | 'OWNER') => Promise<void>
   signup: (request: SignupRequest) => Promise<void>
   logout: () => void
   updateDisplayName: (name: string) => void
@@ -22,6 +23,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = async (username: string, password: string) => {
     const response = await authApi.login({ username, password })
     const auth = toStoredAuth(response)
+    saveStoredAuth(auth)
+    setUser(auth)
+  }
+
+  const demoLogin = async (role: 'USER' | 'OWNER') => {
+    const auth = toStoredAuth(await authApi.demoLogin(role))
     saveStoredAuth(auth)
     setUser(auth)
   }
@@ -55,7 +62,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   const value = useMemo<AuthContextValue>(
-    () => ({ user, isAuthenticated: user !== null, isOwner: user?.role === 'OWNER', isAdmin: user?.role === 'ADMIN', login, signup, logout, updateDisplayName }),
+    () => ({ user, isAuthenticated: user !== null, isOwner: user?.role === 'OWNER', isAdmin: user?.role === 'ADMIN', login, demoLogin, signup, logout, updateDisplayName }),
     [user],
   )
 

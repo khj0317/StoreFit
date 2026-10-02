@@ -4,6 +4,7 @@ import com.luggagestorage.auth.security.SecurityUtil;
 import com.luggagestorage.auth.service.RefreshTokenService;
 import com.luggagestorage.common.exception.BusinessException;
 import com.luggagestorage.common.exception.ErrorCode;
+import com.luggagestorage.demo.DemoAccounts;
 import com.luggagestorage.member.dto.ChangePasswordRequest;
 import com.luggagestorage.member.dto.ChangePhoneRequest;
 import com.luggagestorage.member.dto.DeleteAccountRequest;
@@ -102,6 +103,7 @@ public class MemberService {
     @Transactional
     public MemberProfileResponse updateProfile(UpdateProfileRequest request) {
         Member member = getCurrentMember();
+        requireNotDemo(member);
         member.rename(request.name());
         return MemberProfileResponse.from(member);
     }
@@ -109,6 +111,7 @@ public class MemberService {
     @Transactional
     public MemberProfileResponse changePhone(ChangePhoneRequest request) {
         Member member = getCurrentMember();
+        requireNotDemo(member);
         String phone = phoneVerificationService.consume(request.verificationToken(), VerificationPurpose.CHANGE_PHONE, request.phoneNumber());
         if (memberRepository.existsByPhoneNumber(phone)) {
             throw new BusinessException(ErrorCode.DUPLICATE_PHONE);
@@ -159,5 +162,12 @@ public class MemberService {
         String username = SecurityUtil.getCurrentUsername();
         return memberRepository.findByUsername(username)
             .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
+    }
+
+    /** 체험 계정은 여러 사람이 같이 쓰므로 이름·번호를 바꿀 수 없다 (비밀번호 변경·탈퇴는 비밀번호를 아무도 몰라서 막힌다) */
+    private static void requireNotDemo(Member member) {
+        if (DemoAccounts.isDemo(member)) {
+            throw new BusinessException(ErrorCode.DEMO_ACCOUNT_RESTRICTED);
+        }
     }
 }

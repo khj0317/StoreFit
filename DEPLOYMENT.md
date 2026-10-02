@@ -70,6 +70,8 @@
 
 - **서버 깨우기**: Render 무료 서버는 15분 동안 요청이 없으면 잠들고, 다음 접속에 깨어나는 데 1분쯤 걸린다. 프론트엔드가 사이트를 열자마자 서버를 깨우기 시작하고, 그동안 "잠든 서버를 깨우는 중이에요" 안내를 띄운 뒤 깨어나면 요청을 이어서 보낸다. 무료 사용 시간(워크스페이스 전체 월 750시간)을 다른 서비스와 나눠 쓰기 위해 24시간 깨워 두지 않는다.
 - **keep-awake** (GitHub Actions, 매일 오전 10시 5분): 서버와 Supabase를 하루 한 번 깨운다. Supabase가 오래 쓰이지 않아 일시정지되는 것을 막고, 깨어 있는 동안 그날의 알림이 나간다.
+- **체험 계정**: 서버가 켜질 때 `demo_user`(체험 이용자)·`demo_owner`(체험 사장님, 홍대·신촌·강남역점 운영)를 만들고, 매일 처음 깨어날 때 체험 데이터를 처음 상태로 되돌린다. 비밀번호는 매번 아무도 모르는 값으로 바뀌어서 로그인 화면의 "둘러보기"로만 들어갈 수 있고, 체험 계정에는 문자를 보내지 않는다. 끄려면 Render에서 `DEMO_ENABLED=false`.
+- **인증 문자 한도**: 번호당(1분 재전송·시간당 5회)에 더해 IP당 시간당 10회, 하루 전체 30회(`VERIFICATION_DAILY_LIMIT`)까지만 보낸다. 솔라피 충전금·일일 발송 한도를 넘지 않기 위해서다.
 - **CI** (GitHub Actions, 푸시·PR마다): 백엔드 테스트(실제 Postgres 컨테이너) + 프론트 린트·빌드
 - **서버 안의 스케줄러** (한국 시간)
   - 1분마다: 결제 마감(예약 후 30분)이 지난 미결제 예약 자동 취소
@@ -85,5 +87,6 @@ cd frontend && npm run dev        # http://localhost:5173
 ```
 
 - 문자는 실제로 보내지 않고 백엔드 로그와 **본사 관리 → 알림 기록**에 남는다. 휴대폰 인증번호는 가입 화면에 "개발 모드"로 보여준다.
-- 데모 계정 (로컬 전용, [`DemoDataInitializer`](backend/src/main/java/com/luggagestorage/common/config/DemoDataInitializer.java) 참고): `demo_owner`(지점 3곳 운영), `demo_admin`(본사 관리자)
+- 로그인 화면의 **이용자로 둘러보기 / 사장님으로 둘러보기**로 체험 계정에 들어갈 수 있다 (배포에서도 같음, [`DemoService`](backend/src/main/java/com/luggagestorage/demo/DemoService.java))
+- 로컬 전용 데모 관리자: `demo_admin` / `demo1234!` ([`DemoDataInitializer`](backend/src/main/java/com/luggagestorage/common/config/DemoDataInitializer.java))
 - 테스트: `cd backend && ./gradlew test` (Docker가 켜져 있어야 한다)
