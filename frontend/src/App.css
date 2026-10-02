@@ -2535,7 +2535,7 @@ textarea {
 
 .demo-entry-buttons {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 10px;
 }
 
@@ -2617,8 +2617,3 @@ textarea {
   color: var(--text-h);
 }
 
-@media (max-width: 480px) {
-  .demo-entry-buttons {
-    grid-template-columns: 1fr;
-  }
-}

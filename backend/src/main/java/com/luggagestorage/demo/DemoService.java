@@ -98,7 +98,8 @@ public class DemoService {
         if (!enabled) {
             return;
         }
-        Member owner = ensureMember(DemoAccounts.OWNER_USERNAME, "체험 사장님", DemoAccounts.OWNER_PHONE, MemberRole.OWNER);
+        // 화면에서 이름 뒤에 "님"을 붙이므로 이름에는 "님"을 넣지 않는다
+        Member owner = ensureMember(DemoAccounts.OWNER_USERNAME, "체험 사장", DemoAccounts.OWNER_PHONE, MemberRole.OWNER);
         ensureMember(DemoAccounts.USER_USERNAME, "체험 이용자", DemoAccounts.USER_PHONE, MemberRole.USER);
         BRANCHES.forEach((code, capacity) -> storagePlaceRepository.findByCode(code)
             .filter(place -> !place.isOperating())
@@ -188,6 +189,7 @@ public class DemoService {
         return memberRepository.findByUsername(username)
             .map(member -> {
                 member.changePassword(unusablePassword);
+                member.rename(name);
                 return member;
             })
             .orElseGet(() -> memberRepository.save(role == MemberRole.OWNER
