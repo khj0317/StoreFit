@@ -46,6 +46,11 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* 한글이 단어 중간에서 끊기지 않게 띄어쓰기 단위로 줄을 바꾸고(긴 URL·코드는 넘칠 때만 끊는다),
+     마지막 줄에 한두 글자만 남지 않게 한다 */
+  word-break: keep-all;
+  overflow-wrap: break-word;
+  text-wrap: pretty;
 }
 
 * {
@@ -60,6 +65,8 @@ body {
 h1,
 h2,
 h3 {
+  /* 제목은 줄마다 길이를 비슷하게 나눈다 */
+  text-wrap: balance;
   color: var(--text-h);
   font-weight: 800;
   letter-spacing: -0.03em;
