@@ -42,9 +42,9 @@
 |---|---|
 | ![대시보드](docs/screenshots/05-owner-dashboard.jpg) | ![QR 체크인](docs/screenshots/06-owner-scan.jpg) |
 
-| 본사 관리 · 운영 신청 심사 |
-|---|
-| ![본사 관리](docs/screenshots/07-admin-review.jpg) |
+| 본사 관리 · 운영 신청 심사 | 가입 없이 둘러보기 |
+|---|---|
+| ![본사 관리](docs/screenshots/07-admin-review.jpg) | ![둘러보기](docs/screenshots/08-demo-login.jpg) |
 
 ## 예약 흐름
 
