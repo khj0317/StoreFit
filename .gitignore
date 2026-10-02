@@ -3,3 +3,5 @@ Thumbs.db
 *.log
 .env
 .vscode/
+# 개인 편집기 설정
+*.code-workspace
