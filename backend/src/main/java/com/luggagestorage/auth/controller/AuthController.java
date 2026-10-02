@@ -75,6 +75,13 @@ public class AuthController {
         return ResponseEntity.ok(tokensFor(member, refreshTokenService.issue(member)));
     }
 
+    /** 개발·E2E 테스트 전용: 체험 데이터를 처음 상태로 되돌린다 (배포에서는 404) */
+    @PostMapping("/demo-reset")
+    public ResponseEntity<Void> demoReset() {
+        demoService.resetOnRequest();
+        return ResponseEntity.noContent().build();
+    }
+
     /** 액세스 토큰이 만료되면 리프레시 토큰으로 새 토큰 한 쌍을 받는다 */
     @PostMapping("/refresh")
     public ResponseEntity<LoginResponse> refresh(@Valid @RequestBody RefreshRequest request) {

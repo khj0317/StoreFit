@@ -38,6 +38,7 @@ app:
     enabled: false
   demo:
     enabled: true
+    allow-reset: false
   verification:
     max-sends-per-ip-per-hour: 10
     daily-limit: 0

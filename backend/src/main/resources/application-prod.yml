@@ -36,6 +36,7 @@ app:
     enabled: ${DEMO_DATA_ENABLED:false}
   demo:
     enabled: ${DEMO_ENABLED:true}
+    allow-reset: false
   # 솔라피 일일 발송 한도·충전금을 넘지 않게 인증 문자를 하루 이만큼만 보낸다
   verification:
     max-sends-per-ip-per-hour: ${VERIFICATION_MAX_PER_IP:10}

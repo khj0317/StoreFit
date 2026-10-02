@@ -105,6 +105,8 @@ app:
   # 로그인 화면의 "둘러보기" 체험 계정 (체험 이용자·사장님, 데이터는 매일 초기화)
   demo:
     enabled: ${DEMO_ENABLED:true}
+    # E2E 테스트가 시작할 때 체험 데이터를 되돌리는 API (/api/auth/demo-reset). 배포에서는 끈다
+    allow-reset: ${DEMO_ALLOW_RESET:true}
   # 인증 문자 남용 방지: IP별 시간당 한도, 하루 전체 상한(0이면 제한 없음, 개발에서는 문자가 실제로 가지 않으므로 끔)
   verification:
     max-sends-per-ip-per-hour: ${VERIFICATION_MAX_PER_IP:10}

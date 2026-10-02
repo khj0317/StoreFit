@@ -64,7 +64,16 @@ export function DemoBanner() {
   return (
     <div className="demo-banner" role="status">
       <span>
-        <strong>{user.role === 'OWNER' ? '체험 사장님' : '체험 이용자'}</strong>으로 둘러보는 중이에요 · 데이터는 매일 초기화돼요
+        {user.role === 'OWNER' ? (
+          <>
+            <strong>체험 사장님</strong>으로
+          </>
+        ) : (
+          <>
+            <strong>체험 이용자</strong>로
+          </>
+        )}{' '}
+        둘러보는 중이에요 · 데이터는 매일 초기화돼요
       </span>
       <button
         type="button"

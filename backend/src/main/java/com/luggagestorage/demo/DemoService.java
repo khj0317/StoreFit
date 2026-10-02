@@ -53,6 +53,8 @@ public class DemoService {
     }
 
     private final boolean enabled;
+    /** 개발·E2E 테스트에서만 켠다: 체험 데이터를 아무 때나 처음 상태로 되돌리는 API (배포에서는 꺼짐) */
+    private final boolean allowReset;
     private final MemberRepository memberRepository;
     private final StoragePlaceRepository storagePlaceRepository;
     private final StoreRepository storeRepository;
@@ -64,11 +66,13 @@ public class DemoService {
     private final SecureRandom random = new SecureRandom();
 
     public DemoService(@Value("${app.demo.enabled:false}") boolean enabled,
+                       @Value("${app.demo.allow-reset:false}") boolean allowReset,
                        MemberRepository memberRepository, StoragePlaceRepository storagePlaceRepository,
                        StoreRepository storeRepository, PaymentRepository paymentRepository,
                        CheckInCodeGenerator checkInCodeGenerator, PasswordEncoder passwordEncoder,
                        JdbcTemplate jdbcTemplate, Clock clock) {
         this.enabled = enabled;
+        this.allowReset = allowReset;
         this.memberRepository = memberRepository;
         this.storagePlaceRepository = storagePlaceRepository;
         this.storeRepository = storeRepository;
@@ -122,6 +126,15 @@ public class DemoService {
         }
         reset();
         return true;
+    }
+
+    /** E2E 테스트 시작 전에 체험 데이터를 처음 상태로 되돌린다. 배포에서는 꺼져 있어 없는 API처럼 응답한다 */
+    @Transactional
+    public void resetOnRequest() {
+        if (!enabled || !allowReset) {
+            throw new BusinessException(ErrorCode.DEMO_DISABLED);
+        }
+        reset();
     }
 
     /** 체험 이용자의 예약을 모두 지우고 처음 상태의 예약을 다시 만든다 */

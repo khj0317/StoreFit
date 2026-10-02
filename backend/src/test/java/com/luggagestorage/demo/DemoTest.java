@@ -90,6 +90,14 @@ class DemoTest extends IntegrationTest {
     }
 
     @Test
+    void resetApi_isOffUnlessAllowed() throws Exception {
+        // E2E 테스트용 되돌리기 API는 배포 설정(allow-reset: false)에서는 없는 API처럼 막힌다
+        call(HttpMethod.POST, "/api/auth/demo-reset", null, null)
+            .andExpect(status().isNotFound())
+            .andExpect(jsonPath("$.code").value("DEMO_DISABLED"));
+    }
+
+    @Test
     void demoAccounts_cannotChangeSharedProfile_orLoginWithPassword() throws Exception {
         String user = demoLogin("USER");
         call(HttpMethod.PATCH, "/api/members/me", """
