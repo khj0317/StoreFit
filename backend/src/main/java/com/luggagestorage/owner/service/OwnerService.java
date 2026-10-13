@@ -83,6 +83,10 @@ public class OwnerService {
     @Transactional
     public BranchApplicationResponse applyForBranch(Long placeId, BranchApplyRequest request) {
         Member owner = getCurrentMember();
+        // 체험 사장님의 신청은 관리자 심사 목록에 쌓이기만 하고, 잘못 승인되면 체험 계정이 지점을 더 맡게 된다
+        if (DemoAccounts.isDemo(owner)) {
+            throw new BusinessException(ErrorCode.DEMO_ACCOUNT_RESTRICTED);
+        }
         StoragePlace place = storagePlaceRepository.findById(placeId)
             .orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
         if (place.isOperating()) {

@@ -89,6 +89,8 @@ function OperationForm({
 }
 
 export function OwnerPlacesPage() {
+  // 체험 사장님은 운영 신청을 할 수 없다 (서버가 막는다). 신청 버튼 대신 안내를 보여준다
+  const demo = useAuth().user?.demo ?? false
   const [places, setPlaces] = useState<Place[] | null>(null)
   const [branches, setBranches] = useState<Place[]>([])
   const [applications, setApplications] = useState<BranchApplication[]>([])
@@ -129,7 +131,7 @@ export function OwnerPlacesPage() {
             스토어핏 정식 지점 중 운영할 곳을 신청하면 본사 심사 후 운영을 시작해요. 결과는 문자로 알려드려요.
           </p>
         </div>
-        {!picking && (
+        {!picking && !demo && (
           <button type="button" className="btn btn-primary btn-sm" onClick={() => setPicking(true)}>
             <PlusIcon size={15} /> 지점 운영 신청
           </button>
@@ -137,6 +139,7 @@ export function OwnerPlacesPage() {
       </div>
 
       {notice && <p className="success-text">{notice}</p>}
+      {demo && <p className="place-hint">체험 계정은 새 지점 운영 신청을 할 수 없어요. 직접 가입하면 신청할 수 있어요.</p>}
 
       {visibleApplications.length > 0 && (
         <div className="mypage-section">
@@ -160,7 +163,7 @@ export function OwnerPlacesPage() {
         </div>
       )}
 
-      {picking && (
+      {picking && !demo && (
         <div className="mypage-section">
           <div className="section-header section-header-tight">
             <h2>운영할 지점 선택</h2>

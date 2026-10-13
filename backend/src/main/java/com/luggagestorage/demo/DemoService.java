@@ -22,6 +22,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.security.SecureRandom;
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
@@ -42,6 +44,11 @@ import java.util.UUID;
 public class DemoService {
 
     private static final String RESET_JOB = "DEMO_RESET";
+    /**
+     * 오늘 맡길 짐(체크인 QR)은 하나뿐이라, 누가 체크인하거나 취소하면 다음 방문자는 QR 체크인을 해볼 수 없다.
+     * 그런 상태가 이만큼 이어지면 처음 상태로 되돌린다 (방금 체험한 사람이 결과를 볼 시간은 남긴다)
+     */
+    static final Duration REFRESH_AFTER_USED = Duration.ofMinutes(20);
 
     /** 체험 사장님이 맡을 지점과 수용량 (강남역점은 자리 마감을 시험해보기 좋게 작게) */
     private static final Map<String, Integer> BRANCHES = new LinkedHashMap<>();
@@ -64,6 +71,8 @@ public class DemoService {
     private final JdbcTemplate jdbcTemplate;
     private final Clock clock;
     private final SecureRandom random = new SecureRandom();
+    /** 오늘 맡길 짐이 쓰인 것을 처음 알아챈 시각 (서버가 한 대라 메모리에 둔다. 재시작하면 다시 센다) */
+    private Instant dropOffUsedSince;
 
     public DemoService(@Value("${app.demo.enabled:false}") boolean enabled,
                        @Value("${app.demo.allow-reset:false}") boolean allowReset,
@@ -128,6 +137,44 @@ public class DemoService {
         return true;
     }
 
+    /**
+     * 오늘 맡길 짐이 체크인·취소되어 QR 체크인을 해볼 수 없는 상태가 REFRESH_AFTER_USED 넘게 이어지면 처음 상태로 되돌린다.
+     * 스케줄러가 10분마다 부른다.
+     * @return 이번에 되돌렸으면 true
+     */
+    @Transactional
+    public synchronized boolean refreshIfDropOffUsed() {
+        if (!enabled) {
+            return false;
+        }
+        Instant now = clock.instant();
+        if (hasDropOffWaiting()) {
+            dropOffUsedSince = null;
+            return false;
+        }
+        if (dropOffUsedSince == null) {
+            dropOffUsedSince = now;
+            return false;
+        }
+        if (Duration.between(dropOffUsedSince, now).compareTo(REFRESH_AFTER_USED) < 0) {
+            return false;
+        }
+        reset();
+        dropOffUsedSince = null;
+        return true;
+    }
+
+    /** 체험 이용자에게 결제를 마치고 오늘 체크인을 기다리는 예약이 있는지 */
+    private boolean hasDropOffWaiting() {
+        return Boolean.TRUE.equals(jdbcTemplate.queryForObject("""
+            select exists (
+                select 1 from stores s
+                join members m on m.id = s.member_id
+                join payments p on p.store_id = s.id
+                where m.username = ? and s.status = 'PENDING' and s.start_date = ? and p.status = 'DONE')
+            """, Boolean.class, DemoAccounts.USER_USERNAME, LocalDate.now(clock)));
+    }
+
     /** E2E 테스트 시작 전에 체험 데이터를 처음 상태로 되돌린다. 배포에서는 꺼져 있어 없는 API처럼 응답한다 */
     @Transactional
     public void resetOnRequest() {
@@ -152,6 +199,8 @@ public class DemoService {
         jdbcTemplate.update("delete from store_images where store_id in (select id from stores where member_id = ?)", user.getId());
         jdbcTemplate.update("delete from payments where store_id in (select id from stores where member_id = ?)", user.getId());
         jdbcTemplate.update("delete from stores where member_id = ?", user.getId());
+        // 예전에 체험 사장님으로 낸 운영 신청이 관리자 심사 목록에 남지 않게 지운다 (지금은 신청 자체를 막는다)
+        jdbcTemplate.update("delete from branch_applications where applicant_id = ? and status = 'PENDING'", owner.getId());
         // 체험하기를 누를 때마다 쌓이는 로그인 기록 중 끝난 것을 정리한다
         jdbcTemplate.update("delete from refresh_tokens where member_id in (?, ?) and (revoked_at is not null or expires_at < now())",
             user.getId(), owner.getId());

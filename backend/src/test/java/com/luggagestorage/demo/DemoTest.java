@@ -7,7 +7,10 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.test.util.AopTestUtils;
+import org.springframework.test.util.ReflectionTestUtils;
 
+import java.time.Instant;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -150,6 +153,51 @@ class DemoTest extends IntegrationTest {
             .andExpect(jsonPath("$.capacity").value(500));
         demoService.reset();
         assertThat(storagePlaceRepository.findByCode("GANGNAM").orElseThrow().getCapacity()).isEqualTo(3);
+    }
+
+    @Test
+    void demoOwner_cannotApplyForBranch_andLeftoverApplicationsAreClearedOnReset() throws Exception {
+        String owner = demoLogin("OWNER");
+        long placeId = registerBranch();
+        apply(owner, placeId, 5)
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("DEMO_ACCOUNT_RESTRICTED"));
+
+        // 막기 전에 들어간 신청은 되돌릴 때 관리자 심사 목록에서 지운다
+        Long ownerId = memberRepository.findByUsername(DemoAccounts.OWNER_USERNAME).orElseThrow().getId();
+        jdbcTemplate.update("""
+            insert into branch_applications (created_at, updated_at, place_id, applicant_id, capacity, status)
+            values (now(), now(), ?, ?, 5, 'PENDING')
+            """, placeId, ownerId);
+        demoService.reset();
+        Integer pending = jdbcTemplate.queryForObject(
+            "select count(*) from branch_applications where applicant_id = ? and status = 'PENDING'", Integer.class, ownerId);
+        assertThat(pending).isZero();
+    }
+
+    @Test
+    void usedDropOff_isRestoredAfterAWhile_soTheNextVisitorCanTryQrCheckIn() throws Exception {
+        DemoService target = AopTestUtils.getTargetObject(demoService);
+        ReflectionTestUtils.setField(target, "dropOffUsedSince", null);
+        // 아직 아무도 체크인하지 않았으면 되돌리지 않는다
+        assertThat(demoService.refreshIfDropOffUsed()).isFalse();
+
+        String user = demoLogin("USER");
+        String owner = demoLogin("OWNER");
+        String body = call(HttpMethod.GET, "/api/stores/me", null, user).andReturn().getResponse().getContentAsString();
+        String code = JsonPath.<List<String>>read(body, "$[?(@.status == 'PENDING')].checkInCode").get(0);
+        call(HttpMethod.POST, "/api/owner/check-ins/" + code + "/check-in", null, owner).andExpect(status().isOk());
+
+        // 체크인한 사람이 결과를 볼 시간은 남긴다
+        assertThat(demoService.refreshIfDropOffUsed()).isFalse();
+        assertThat(demoService.refreshIfDropOffUsed()).isFalse();
+        assertThat(statusesOfDemoUser(user)).containsExactlyInAnyOrder("IN_USE", "IN_USE", "COMPLETED");
+
+        // 그 상태로 시간이 지나면 처음 상태로 되돌려 다음 방문자도 QR 체크인을 해볼 수 있다
+        ReflectionTestUtils.setField(target, "dropOffUsedSince",
+            Instant.now().minus(DemoService.REFRESH_AFTER_USED.plusMinutes(1)));
+        assertThat(demoService.refreshIfDropOffUsed()).isTrue();
+        assertThat(statusesOfDemoUser(user)).containsExactlyInAnyOrder("IN_USE", "PENDING", "COMPLETED");
     }
 
     @Test

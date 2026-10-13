@@ -50,7 +50,7 @@ export function DemoEntry() {
         </button>
       </div>
       {error && <p className="error-text">{error}</p>}
-      <p className="demo-entry-note">체험 계정은 여러 사람이 함께 쓰고, 데이터는 매일 처음 상태로 돌아가요. 문자는 보내지 않아요.</p>
+      <p className="demo-entry-note">체험 계정은 여러 사람이 함께 쓰고, 데이터는 매일 처음 상태로 돌아가요. 누가 QR 체크인을 해 봤다면 20분쯤 뒤 다시 해볼 수 있어요. 문자는 보내지 않아요.</p>
     </section>
   )
 }
