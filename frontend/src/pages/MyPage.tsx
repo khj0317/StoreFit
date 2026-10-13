@@ -240,6 +240,7 @@ function DeleteAccountSection() {
 }
 
 export function MyPage() {
+  const demo = useAuth().user?.demo ?? false
   const [profile, setProfile] = useState<MemberProfile | null>(null)
   const [status, setStatus] = useState<'loading' | 'ready' | 'error'>('loading')
   const [error, setError] = useState('')
@@ -269,10 +270,20 @@ export function MyPage() {
               <span>@{profile.username}</span>
             </div>
           </div>
-          <ProfileSection profile={profile} onUpdated={setProfile} />
-          <PhoneSection profile={profile} onUpdated={setProfile} />
-          <PasswordSection />
-          <DeleteAccountSection />
+          {demo ? (
+            // 체험 계정은 여러 사람이 같이 쓰므로 서버가 정보 변경·탈퇴를 막는다. 실패할 폼 대신 안내만 보여준다
+            <section className="mypage-section">
+              <h2>체험 계정</h2>
+              <p>여러 사람이 함께 쓰는 체험 계정이라 이름·휴대폰 번호·비밀번호를 바꾸거나 탈퇴할 수 없어요. 직접 가입하면 모두 이용할 수 있어요.</p>
+            </section>
+          ) : (
+            <>
+              <ProfileSection profile={profile} onUpdated={setProfile} />
+              <PhoneSection profile={profile} onUpdated={setProfile} />
+              <PasswordSection />
+              <DeleteAccountSection />
+            </>
+          )}
         </>
       )}
     </section>

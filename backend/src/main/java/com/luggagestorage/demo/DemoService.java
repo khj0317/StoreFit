@@ -161,6 +161,13 @@ public class DemoService {
             log.warn("체험 사장님이 운영하는 지점이 없어 체험 예약을 만들지 않았습니다.");
             return;
         }
+        // 둘러보는 사람이 바꾼 수용량을 처음 값으로 되돌린다 (소개는 OwnerService가 바꾸지 못하게 막는다)
+        places.forEach(place -> {
+            Integer capacity = BRANCHES.get(place.getCode());
+            if (capacity != null) {
+                place.updateOperation(capacity, null);
+            }
+        });
         LocalDate today = LocalDate.now(clock);
         LocalDateTime now = LocalDateTime.now(clock);
 

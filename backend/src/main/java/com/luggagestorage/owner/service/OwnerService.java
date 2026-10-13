@@ -3,6 +3,7 @@ package com.luggagestorage.owner.service;
 import com.luggagestorage.auth.security.SecurityUtil;
 import com.luggagestorage.common.exception.BusinessException;
 import com.luggagestorage.common.exception.ErrorCode;
+import com.luggagestorage.demo.DemoAccounts;
 import com.luggagestorage.member.entity.Member;
 import com.luggagestorage.member.repository.MemberRepository;
 import com.luggagestorage.owner.dto.OwnerDashboardResponse;
@@ -109,6 +110,11 @@ public class OwnerService {
         StoragePlace place = storagePlaceRepository.findByIdForUpdate(placeId)
             .filter(found -> found.isOwnedBy(owner.getId()))
             .orElseThrow(() -> new BusinessException(ErrorCode.PLACE_NOT_FOUND));
+        // 체험 사장님의 지점은 정식 지점이라 소개가 모든 이용자에게 보이므로 바꿀 수 없다 (수용량은 DemoService.reset이 매일 되돌린다)
+        String description = blankToNull(request.description());
+        if (DemoAccounts.isDemo(owner) && description != null && !description.equals(place.getDescription())) {
+            throw new BusinessException(ErrorCode.DEMO_ACCOUNT_RESTRICTED);
+        }
 
         LocalDate today = LocalDate.now(clock);
         LocalDate until = today.plusDays(CAPACITY_CHECK_DAYS);
@@ -117,7 +123,7 @@ public class OwnerService {
             throw new BusinessException(ErrorCode.PLACE_CAPACITY_TOO_SMALL);
         }
 
-        place.updateOperation(request.capacity(), blankToNull(request.description()));
+        place.updateOperation(request.capacity(), description);
         int occupied = CapacityCalculator.peakOccupancy(upcoming, today, today);
         return PlaceResponse.of(place, place.getCapacity() - occupied);
     }

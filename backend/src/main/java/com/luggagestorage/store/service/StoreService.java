@@ -234,6 +234,10 @@ public class StoreService {
         if (imageUrls == null || imageUrls.isEmpty()) {
             return List.of();
         }
+        // 체험 계정은 누구나 쓰므로 사진을 붙일 수 없다 (업로드도 막혀 있고, 바깥 주소를 넣어 다른 방문자에게 보이는 것도 막는다)
+        if (DemoAccounts.isDemo(store.getMember())) {
+            throw new BusinessException(ErrorCode.DEMO_ACCOUNT_RESTRICTED);
+        }
 
         List<StoreImage> images = new ArrayList<>();
         for (int i = 0; i < imageUrls.size(); i++) {

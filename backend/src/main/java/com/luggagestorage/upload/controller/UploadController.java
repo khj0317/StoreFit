@@ -1,8 +1,10 @@
 package com.luggagestorage.upload.controller;
 
+import com.luggagestorage.auth.security.SecurityUtil;
 import com.luggagestorage.common.exception.BusinessException;
 import com.luggagestorage.common.exception.ErrorCode;
 import com.luggagestorage.common.storage.FileStorage;
+import com.luggagestorage.demo.DemoAccounts;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -36,6 +38,10 @@ public class UploadController {
 
     @PostMapping("/images")
     public ResponseEntity<List<String>> uploadImages(@RequestParam("files") List<MultipartFile> files) {
+        // 체험 계정은 휴대폰 인증 없이 누구나 받을 수 있으므로, 공개 저장소에 파일을 올리지 못하게 한다
+        if (DemoAccounts.isDemoUsername(SecurityUtil.getCurrentUsername())) {
+            throw new BusinessException(ErrorCode.DEMO_ACCOUNT_RESTRICTED);
+        }
         if (files.size() > MAX_FILES) {
             throw new BusinessException(ErrorCode.TOO_MANY_FILES);
         }

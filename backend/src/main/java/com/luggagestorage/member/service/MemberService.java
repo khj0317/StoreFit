@@ -123,6 +123,7 @@ public class MemberService {
     @Transactional
     public void changePassword(ChangePasswordRequest request) {
         Member member = getCurrentMember();
+        requireNotDemo(member);
         if (!passwordEncoder.matches(request.currentPassword(), member.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
@@ -133,6 +134,7 @@ public class MemberService {
     @Transactional
     public void deleteAccount(DeleteAccountRequest request) {
         Member member = getCurrentMember();
+        requireNotDemo(member);
         if (!passwordEncoder.matches(request.password(), member.getPassword())) {
             throw new BusinessException(ErrorCode.INVALID_PASSWORD);
         }
@@ -164,7 +166,7 @@ public class MemberService {
             .orElseThrow(() -> new BusinessException(ErrorCode.MEMBER_NOT_FOUND));
     }
 
-    /** 체험 계정은 여러 사람이 같이 쓰므로 이름·번호를 바꿀 수 없다 (비밀번호 변경·탈퇴는 비밀번호를 아무도 몰라서 막힌다) */
+    /** 체험 계정은 여러 사람이 같이 쓰므로 이름·번호·비밀번호를 바꾸거나 탈퇴할 수 없다 */
     private static void requireNotDemo(Member member) {
         if (DemoAccounts.isDemo(member)) {
             throw new BusinessException(ErrorCode.DEMO_ACCOUNT_RESTRICTED);

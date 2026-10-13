@@ -25,7 +25,11 @@ public final class DemoAccounts {
     }
 
     public static boolean isDemo(Member member) {
-        return member != null && USERNAMES.contains(member.getUsername());
+        return member != null && isDemoUsername(member.getUsername());
+    }
+
+    public static boolean isDemoUsername(String username) {
+        return username != null && USERNAMES.contains(username);
     }
 
     public static boolean isDemoPayment(Payment payment) {

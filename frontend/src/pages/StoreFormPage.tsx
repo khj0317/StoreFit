@@ -3,6 +3,7 @@ import { Link, useNavigate, useParams } from 'react-router-dom'
 import { getPlaces } from '../api/places'
 import { createStore, getStore, updateStore } from '../api/stores'
 import { uploadImages } from '../api/uploads'
+import { useAuth } from '../auth/AuthContext'
 import { BranchMap } from '../components/BranchMap'
 import { CategoryIcon } from '../components/CategoryIcon'
 import { Loading } from '../components/Feedback'
@@ -59,6 +60,7 @@ export function StoreFormPage() {
   const { storeId, category: categoryParam } = useParams<{ storeId: string; category: string }>()
   const isEdit = storeId !== undefined
   const navigate = useNavigate()
+  const demo = useAuth().user?.demo ?? false
 
   const [form, setForm] = useState<StoreFormValues>(() => emptyForm(isStoreCategory(categoryParam) ? categoryParam : 'OTHER'))
   // 수정할 때는 서버의 "남은 자리"에 내 기존 예약이 이미 빠져 있으므로 다시 더해서 보여준다
@@ -329,6 +331,9 @@ export function StoreFormPage() {
             <span className="form-label">
               사진 <span className="form-hint">(선택)</span>
             </span>
+            {demo ? (
+              <p className="form-hint">체험 계정은 사진 없이 예약할 수 있어요</p>
+            ) : (
             <div className="image-preview-grid">
               {form.imageUrls.map((url) => (
                 <div key={url} className="image-preview">
@@ -344,6 +349,7 @@ export function StoreFormPage() {
                 {uploading ? '올리는 중' : '사진 추가'}
               </label>
             </div>
+            )}
             {uploadError && <p className="error-text">{uploadError}</p>}
           </div>
 

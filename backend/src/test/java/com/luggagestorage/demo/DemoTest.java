@@ -6,6 +6,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpMethod;
+import org.springframework.mock.web.MockMultipartFile;
 
 import java.util.List;
 
@@ -14,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -114,5 +116,49 @@ class DemoTest extends IntegrationTest {
             {"role": "ADMIN"}
             """, null)
             .andExpect(status().isBadRequest());
+
+        // 비밀번호 변경·탈퇴도 "비밀번호가 틀렸다"가 아니라 체험 계정이라 막혔다고 알려 준다
+        call(HttpMethod.POST, "/api/members/me/password", """
+            {"currentPassword": "anything", "newPassword": "newpassword1"}
+            """, user)
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("DEMO_ACCOUNT_RESTRICTED"));
+        call(HttpMethod.DELETE, "/api/members/me", """
+            {"password": "anything"}
+            """, user)
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("DEMO_ACCOUNT_RESTRICTED"));
+    }
+
+    @Test
+    void demoOwner_cannotChangeBranchDescription_andCapacityIsRestoredOnReset() throws Exception {
+        String owner = demoLogin("OWNER");
+        var gangnam = storagePlaceRepository.findByCode("GANGNAM").orElseThrow();
+
+        // 정식 지점 소개는 모든 이용자에게 보이므로 바꿀 수 없다
+        call(HttpMethod.PUT, "/api/owner/places/" + gangnam.getId(), """
+            {"capacity": 3, "description": "아무나 쓴 소개"}
+            """, owner)
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("DEMO_ACCOUNT_RESTRICTED"));
+
+        // 수용량은 바꿔 볼 수 있지만 되돌리면 처음 값으로 돌아간다
+        call(HttpMethod.PUT, "/api/owner/places/" + gangnam.getId(), """
+            {"capacity": 500, "description": %s}
+            """.formatted(gangnam.getDescription() == null ? "null" : "\"" + gangnam.getDescription() + "\""), owner)
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.capacity").value(500));
+        demoService.reset();
+        assertThat(storagePlaceRepository.findByCode("GANGNAM").orElseThrow().getCapacity()).isEqualTo(3);
+    }
+
+    @Test
+    void demoUser_cannotUploadImages() throws Exception {
+        String user = demoLogin("USER");
+        mockMvc.perform(multipart("/api/uploads/images")
+                .file(new MockMultipartFile("files", "a.png", "image/png", new byte[]{1, 2, 3}))
+                .header("Authorization", "Bearer " + user))
+            .andExpect(status().isForbidden())
+            .andExpect(jsonPath("$.code").value("DEMO_ACCOUNT_RESTRICTED"));
     }
 }

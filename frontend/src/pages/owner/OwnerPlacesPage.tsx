@@ -1,5 +1,6 @@
 import { type FormEvent, useEffect, useState } from 'react'
 import { applyForBranch, getAvailableBranches, getMyApplications, getMyPlaces, updatePlace } from '../../api/owner'
+import { useAuth } from '../../auth/AuthContext'
 import { EmptyState, Loading } from '../../components/Feedback'
 import { BoxIcon, PinIcon, PlusIcon } from '../../components/Icons'
 import { getErrorMessage } from '../../lib/api'
@@ -25,6 +26,8 @@ function OperationForm({
   onSubmit: (capacity: number, description: string | null, message: string | null) => Promise<void>
   onCancel: () => void
 }) {
+  // 체험 사장님이 운영 중인 지점의 소개는 모든 이용자에게 보이므로 서버가 막는다 (운영 신청 폼은 그대로)
+  const lockDescription = (useAuth().user?.demo ?? false) && !withMessage
   const [capacity, setCapacity] = useState(String(place.capacity))
   const [description, setDescription] = useState(place.description ?? '')
   const [message, setMessage] = useState('')
@@ -61,7 +64,8 @@ function OperationForm({
         <span className="form-label">
           소개 <span className="form-hint">(선택 · 운영 시간, 찾아오는 길 등)</span>
         </span>
-        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} maxLength={500} />
+        <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} maxLength={500} disabled={lockDescription} />
+        {lockDescription && <span className="form-hint">체험 계정은 지점 소개를 바꿀 수 없어요 (수용량은 매일 처음 값으로 돌아가요)</span>}
       </label>
       {withMessage && (
         <label className="form-group">
